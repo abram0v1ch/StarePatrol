@@ -156,9 +156,13 @@ class TimerManager: ObservableObject {
                 let wasWorking = !isBreaking
                 isBreaking.toggle()
                 timeRemaining = isBreaking ? breakInterval : workInterval
-                // Play work-end sound when transitioning work → break
-                if isBreaking && wasWorking && isWorkEndSoundEnabled {
-                    SoundManager.shared.previewSound(selectedSoundName)
+                // Work→break transition: play work-end sound if enabled
+                if isBreaking && wasWorking {
+                    let workEndOn = UserDefaults.standard.bool(forKey: "isWorkEndSoundEnabled")
+                    if workEndOn {
+                        let soundName = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
+                        SoundManager.shared.previewSound(soundName)
+                    }
                 }
                 showReminderIfNeeded()
             }
@@ -174,12 +178,14 @@ class TimerManager: ObservableObject {
     
     private func showReminderIfNeeded() {
         if isBreaking {
+            // Play break-start sound / haptics
+            SoundManager.shared.triggerFeedback()
             switch notificationMode {
             case "fullscreen":
                 ReminderWindowManager.shared.showReminder(timerManager: self)
             case "notification":
                 sendLocalNotification()
-            default: // "none"
+            default:
                 break
             }
             NotificationCenter.default.post(name: .showReminder, object: nil)

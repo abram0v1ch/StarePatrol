@@ -252,9 +252,8 @@ struct AppearanceSection: View {
                             Button("Reset") { customReminderMessage = "Rest your eyes — look 20ft away." }
                                 .buttonStyle(.link).font(.caption)
                         }
-                        TextEditor(text: $customReminderMessage)
-                            .frame(height: 60)
-                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray.opacity(0.25), lineWidth: 1))
+                        TextField("Reminder message", text: $customReminderMessage)
+                            .textFieldStyle(.roundedBorder)
                     }
                 }
             }
