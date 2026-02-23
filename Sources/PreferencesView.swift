@@ -9,6 +9,9 @@ struct PreferencesView: View {
     @AppStorage("isHapticsEnabled") private var isHapticsEnabled: Bool = true
     @AppStorage("isAppEnabled") private var isAppEnabled: Bool = true
     @AppStorage("useFullScreenPopup") private var useFullScreenPopup: Bool = true
+    @AppStorage("selectedSoundName") private var selectedSoundName: String = "Glass"
+    
+    let availableSounds = ["Glass", "Ping", "Purr", "Funk", "Basso", "Hero", "Pop", "Submarine"]
     
     // Stats
     @AppStorage("totalBreaksTaken") private var totalBreaksTaken: Int = 0
@@ -69,7 +72,21 @@ struct PreferencesView: View {
             
             Section(header: Text("Notifications").font(.headline)) {
                 Toggle("Full Screen Popup (vs. System Notification)", isOn: $useFullScreenPopup)
-                Toggle("Play Sound (\(isSoundEnabled ? "Glass" : "None"))", isOn: $isSoundEnabled)
+                
+                Toggle("Play Sound", isOn: $isSoundEnabled)
+                if isSoundEnabled {
+                    Picker("Sound Effect", selection: $selectedSoundName) {
+                        ForEach(availableSounds, id: \.self) { sound in
+                            Text(sound).tag(sound)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .onChange(of: selectedSoundName) { _ in
+                        SoundManager.shared.previewSound(selectedSoundName)
+                    }
+                    .padding(.leading, 20)
+                }
+                
                 Toggle("Haptic Feedback", isOn: $isHapticsEnabled)
             }
             .disabled(!isAppEnabled)

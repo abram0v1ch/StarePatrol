@@ -8,16 +8,22 @@ class SoundManager {
         // Set default values if not explicitly set yet
         UserDefaults.standard.register(defaults: [
             "isSoundEnabled": true,
-            "isHapticsEnabled": true
+            "isHapticsEnabled": true,
+            "selectedSoundName": "Glass"
         ])
     }
     
     func playGentleReminderSound() {
         guard UserDefaults.standard.bool(forKey: "isSoundEnabled") else { return }
         
-        // Use a standard system sound that is gentle
-        // Ping, Purr, or Glass are okay. We'll use "Glass".
-        if let sound = NSSound(named: "Glass") {
+        let soundName = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
+        if let sound = NSSound(named: NSSound.Name(soundName)) {
+            sound.play()
+        }
+    }
+    
+    func previewSound(_ name: String) {
+        if let sound = NSSound(named: NSSound.Name(name)) {
             sound.play()
         }
     }
