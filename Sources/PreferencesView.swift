@@ -12,6 +12,7 @@ struct PreferencesView: View {
     @AppStorage("useFullScreenPopup") private var useFullScreenPopup: Bool = true
     @AppStorage("selectedSoundName") private var selectedSoundName: String = "Glass"
     @AppStorage("launchAtLogin") private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
+    @AppStorage("customReminderMessage") private var customReminderMessage: String = "Time to rest your eyes! Look 20 feet away."
     
     let availableSounds = ["Glass", "Ping", "Purr", "Funk", "Basso", "Hero", "Pop", "Submarine"]
     
@@ -52,6 +53,10 @@ struct PreferencesView: View {
                     }
                 Toggle("Enable StarePatrol", isOn: $isAppEnabled)
                     .onChange(of: isAppEnabled) { _ in timerManager.settingsUpdated() }
+                
+                TextField("Reminder Message", text: $customReminderMessage)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.top, 5)
             }
             
             Divider().padding(.vertical, 5)

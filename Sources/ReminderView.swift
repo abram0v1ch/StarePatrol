@@ -16,10 +16,12 @@ struct ReminderView: View {
                     opac = 1.0
                 }
             
-            Text("Time to rest your eyes!")
+            Text(timerManager.customReminderMessage)
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
             
             Text("Look at something 20 feet away for \(Int(timerManager.timeRemaining)) seconds.")
                 .font(.title3)

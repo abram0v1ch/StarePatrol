@@ -18,6 +18,9 @@ class TimerManager: ObservableObject {
     @AppStorage("totalBreaksTaken") var totalBreaksTaken: Int = 0
     @AppStorage("totalBreaksSkipped") var totalBreaksSkipped: Int = 0
     
+    // Customization
+    @AppStorage("customReminderMessage") var customReminderMessage: String = "Time to rest your eyes! Look 20 feet away."
+    
     var workInterval: TimeInterval { TimeInterval(workIntervalMinutes * 60) }
     var breakInterval: TimeInterval { TimeInterval(breakIntervalSeconds) }
     
@@ -137,7 +140,7 @@ class TimerManager: ObservableObject {
     private func sendLocalNotification() {
         let content = UNMutableNotificationContent()
         content.title = "StarePatrol"
-        content.body = "Time to rest your eyes! Look 20 feet away for \(Int(breakInterval)) seconds."
+        content.body = customReminderMessage
         content.categoryIdentifier = "BREAK_REMINDER"
         
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
