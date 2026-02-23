@@ -7,9 +7,11 @@ class PreferencesWindowManager {
 
     func showPreferences(timerManager: TimerManager) {
         if preferencesWindow == nil {
+            // Fixed size — largest section (Notifications) fits at ~500px height.
+            // No dynamic resize = zero jitter when switching sections.
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 520, height: 228),
-                styleMask: [.titled, .closable, .resizable],
+                contentRect: NSRect(x: 0, y: 0, width: 520, height: 500),
+                styleMask: [.titled, .closable],
                 backing: .buffered,
                 defer: false
             )
