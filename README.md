@@ -17,6 +17,22 @@
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/Screenshot_2026-02-23_at_11.26.13_AM.png" width="280" alt="Menu bar popover">
+  &nbsp;&nbsp;
+  <img src="docs/Screenshot_2026-02-23_at_11.26.25_AM.png" width="500" alt="General preferences">
+</p>
+
+<p align="center">
+  <img src="docs/Screenshot_2026-02-23_at_11.27.02_AM.png" width="500" alt="Notifications preferences">
+  &nbsp;&nbsp;
+  <img src="docs/Screenshot_2026-02-23_at_11.26.51_AM.png" width="500" alt="Intervals preferences">
+</p>
+
+---
+
 ## What is StarePatrol?
 
 Staring at a screen for hours without breaks leads to **digital eye strain** — headaches, blurry vision, and tired eyes. The **20-20-20 rule** is the simplest, most effective remedy: every 20 minutes, look at something 20 feet away for 20 seconds.
@@ -29,13 +45,14 @@ StarePatrol lives in your menu bar and enforces this rule silently, with gentle 
 
 - 🕐 **Configurable intervals** — set your own work and break durations
 - 🔔 **Three alert styles** — full-screen takeover, system notification, or silent
-- 🔊 **Sounds** — distinct sounds at break start and break end
-- ⏸ **Pause & Snooze** — pause the timer or snooze a break without losing your flow
+- 🔊 **Sounds** — distinct sounds at break start and break end (choose from 8 system sounds)
+- ⏸ **Flexible pause** — pause for 1 min up to 2 h, or pause **indefinitely** (∞)
 - 🔒 **Strict Mode** — disable skip/snooze for maximum discipline
 - 📊 **Statistics** — track breaks taken and skipped over time
 - 🚀 **Launch at Login** — starts automatically when you log in
 - ✏️ **Customizable message** — change the text shown during breaks
 - 🎨 **Customizable menu bar icon** — pick the SF Symbol you like most
+- 🖱️ **Haptic feedback** — subtle tap when a break starts
 
 ---
 
@@ -45,7 +62,13 @@ StarePatrol lives in your menu bar and enforces this rule silently, with gentle 
 - macOS 14.0 (Sonoma) or later
 - Apple Silicon (arm64)
 
-### Build from source
+### Option A — Download pre-built app
+
+Grab `StarePatrol.app` from the [`release/`](release/) folder, move it to `/Applications`, and open it.
+
+> macOS may show a security prompt the first time. Go to **System Settings → Privacy & Security** and click **Open Anyway**.
+
+### Option B — Build from source
 
 ```bash
 git clone https://github.com/abram0v1ch/StarePatrol.git
@@ -53,14 +76,7 @@ cd StarePatrol
 make run
 ```
 
-This compiles the app, signs it ad-hoc, and launches it automatically.
-
-> **Note:** The build output is at `/tmp/StarePatrol-build/StarePatrol.app`. macOS places a quarantine lock on directories that have previously run apps, so `/tmp` is used as the consistent build location to avoid this.
-
-### After first launch
-macOS may show a security prompt the first time. Go to **System Settings → Privacy & Security** and allow StarePatrol to run.
-
-For notification alerts, open **System Settings → Notifications → StarePatrol** and set style to **Alerts** so they persist until dismissed.
+This compiles, signs ad-hoc, and launches the app automatically. Output is always at `/tmp/StarePatrol-build/StarePatrol.app`.
 
 ---
 
@@ -69,31 +85,28 @@ For notification alerts, open **System Settings → Notifications → StarePatro
 StarePatrol appears as an icon in your **menu bar**. Click it to:
 
 - See the countdown to your next break
-- Pause the timer for a set duration
-- Open Preferences
+- Pause the timer — drag the slider all the way to **∞** to pause indefinitely
+- Hit **Reset Timer** to restart the countdown immediately
+- Open **Preferences…** to configure everything
 
-### Preferences
+### Notification setup (recommended)
 
-| Section | What you can configure |
-|---|---|
-| **General** | Enable/disable the app, Launch at Login, Strict Mode |
-| **Intervals** | Work duration (1–60 min) and break duration (5–300 sec) |
-| **Notifications** | Alert style (Full Screen / Notification / None), sounds at break start and end, haptics, sound selection |
-| **Appearance** | Menu bar icon, custom reminder message |
-| **Statistics** | Breaks taken / skipped, reset button |
-| **Debug** | Trigger an instant break to test your settings |
+For `Notification` alert mode, open:
+**System Settings → Notifications → StarePatrol** → set style to **Alerts**
+so break notifications persist until you dismiss them.
 
 ---
 
-## How it works
+## Preferences
 
-A `Timer` publishes every second on the main thread. When the work interval ends, the app triggers a break:
-
-- **Full Screen** — an `NSPanel` covers all displays, preventing screen use
-- **Notification** — a `UNUserNotification` fires via Notification Center
-- **None** — silent timer only, useful with other reminder systems
-
-Sounds are played using `NSSound(named:)` via system sound files. Break-start and break-end sounds are decoupled so they don't interfere.
+| Section | What you can configure |
+|---|---|
+| **General** | Enable/disable, Launch at Login, Strict Mode |
+| **Intervals** | Work duration (1–60 min), break duration (5–300 sec) |
+| **Notifications** | Alert style, sound at break start / break end, sound selection, haptics |
+| **Appearance** | Menu bar icon, custom reminder message |
+| **Statistics** | Breaks taken / skipped count, reset button |
+| **Debug** | Trigger an instant break to test settings |
 
 ---
 
@@ -101,8 +114,8 @@ Sounds are played using `NSSound(named:)` via system sound files. Break-start an
 
 ```bash
 make build   # compile to /tmp/StarePatrol-build/StarePatrol.app
-make run     # build + open the app
-make clean   # quit the app and remove the build artifacts
+make run     # build + open
+make clean   # quit + remove build artifacts
 ```
 
 ---

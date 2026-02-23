@@ -1,13 +1,14 @@
 import SwiftUI
 
-// Preset snap values for the pause slider (minutes)
-let pauseSnapValues: [Double] = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120]
+// Preset snap values for the pause slider (minutes); 9999 = indefinite
+let pauseSnapValues: [Double] = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120, 9999]
 
 func snapPause(_ raw: Double) -> Double {
     pauseSnapValues.min(by: { abs($0 - raw) < abs($1 - raw) }) ?? raw
 }
 
 func formatPause(_ minutes: Double) -> String {
+    if minutes >= 9999 { return "∞" }
     let m = Int(minutes)
     if m >= 60 {
         let h = m / 60
@@ -48,7 +49,10 @@ struct SettingsView: View {
                         Label("Rest your eyes – look 20ft away", systemImage: "eye")
                             .foregroundColor(.orange)
                     } else if timerManager.isPaused {
-                        Label("Resumes in \(timerManager.timeString)", systemImage: "pause.circle")
+                        let label = timerManager.isTimerRunning
+                            ? "Resumes in \(timerManager.timeString)"
+                            : "Paused indefinitely"
+                        Label(label, systemImage: "pause.circle")
                             .foregroundColor(.secondary)
                     } else {
                         Label("Next break in \(timerManager.timeString)", systemImage: "timer")
@@ -87,8 +91,14 @@ struct SettingsView: View {
                         Button("Resume") { timerManager.resumeTimer() }
                             .buttonStyle(.bordered).controlSize(.small)
                     } else {
-                        Button("Pause") { timerManager.pauseApp(minutes: Int(pauseMinutes)) }
-                            .buttonStyle(.bordered).controlSize(.small)
+                        Button("Pause") {
+                            if pauseMinutes >= 9999 {
+                                timerManager.pauseIndefinitely()
+                            } else {
+                                timerManager.pauseApp(minutes: Int(pauseMinutes))
+                            }
+                        }
+                        .buttonStyle(.bordered).controlSize(.small)
                     }
                 }
             }

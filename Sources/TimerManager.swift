@@ -77,6 +77,8 @@ class TimerManager: ObservableObject {
             }
     }
     
+    var isTimerRunning: Bool { timer != nil }
+    
     func pauseTimer() {
         timer?.cancel()
         timer = nil
@@ -126,6 +128,14 @@ class TimerManager: ObservableObject {
         ReminderWindowManager.shared.hideReminder()
         NotificationCenter.default.post(name: .hideReminder, object: nil)
         startTimer()
+    }
+    
+    func pauseIndefinitely() {
+        isBreaking = false
+        isPaused = true
+        pauseTimer()
+        ReminderWindowManager.shared.hideReminder()
+        NotificationCenter.default.post(name: .hideReminder, object: nil)
     }
     
     func resumeTimer() {
