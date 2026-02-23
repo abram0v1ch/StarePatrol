@@ -20,15 +20,15 @@
 ## Screenshots
 
 <p align="center">
-  <img src="docs/Screenshot_2026-02-23_at_11.26.13_AM.png" width="280" alt="Menu bar popover">
+  <img src="docs/menu_popover.png" width="280" alt="Menu bar popover">
   &nbsp;&nbsp;
-  <img src="docs/Screenshot_2026-02-23_at_11.26.25_AM.png" width="500" alt="General preferences">
+  <img src="docs/preferences_general.png" width="500" alt="General preferences">
 </p>
 
 <p align="center">
-  <img src="docs/Screenshot_2026-02-23_at_11.27.02_AM.png" width="500" alt="Notifications preferences">
+  <img src="docs/preferences_notifications.png" width="500" alt="Notifications preferences">
   &nbsp;&nbsp;
-  <img src="docs/Screenshot_2026-02-23_at_11.26.51_AM.png" width="500" alt="Intervals preferences">
+  <img src="docs/preferences_intervals.png" width="500" alt="Intervals preferences">
 </p>
 
 ---
