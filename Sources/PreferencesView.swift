@@ -179,7 +179,7 @@ struct NotificationsSection: View {
     @AppStorage("notificationMode") private var notificationMode: String = "fullscreen"
     @AppStorage("breakStartSoundEnabled") private var breakStartSoundEnabled: Bool = true
     @AppStorage("breakEndSoundEnabled") private var breakEndSoundEnabled: Bool = true
-    @AppStorage("isWorkEndSoundEnabled") private var isWorkEndSoundEnabled: Bool = false // legacy, unused
+    @AppStorage("selectedSoundName") private var selectedSoundName: String = "Glass"
     @AppStorage("isHapticsEnabled") private var isHapticsEnabled: Bool = true
     @AppStorage("isAppEnabled") private var isAppEnabled: Bool = true
     let availableSounds = ["Glass", "Ping", "Purr", "Funk", "Basso", "Hero", "Pop", "Submarine"]
