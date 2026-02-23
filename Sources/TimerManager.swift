@@ -20,6 +20,7 @@ class TimerManager: ObservableObject {
     
     // Customization
     @AppStorage("customReminderMessage") var customReminderMessage: String = "Time to rest your eyes! Look 20 feet away."
+    @AppStorage("menuBarIconName") var menuBarIconName: String = "eyes"
     
     var workInterval: TimeInterval { TimeInterval(workIntervalMinutes * 60) }
     var breakInterval: TimeInterval { TimeInterval(breakIntervalSeconds) }

@@ -13,8 +13,10 @@ struct PreferencesView: View {
     @AppStorage("selectedSoundName") private var selectedSoundName: String = "Glass"
     @AppStorage("launchAtLogin") private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @AppStorage("customReminderMessage") private var customReminderMessage: String = "Time to rest your eyes! Look 20 feet away."
+    @AppStorage("menuBarIconName") private var menuBarIconName: String = "eyes"
     
     let availableSounds = ["Glass", "Ping", "Purr", "Funk", "Basso", "Hero", "Pop", "Submarine"]
+    let availableIcons = ["eyes", "eyeglasses", "timer", "clock.fill", "eye.fill", "macwindow"]
     
     // Stats
     @AppStorage("totalBreaksTaken") private var totalBreaksTaken: Int = 0
@@ -57,6 +59,16 @@ struct PreferencesView: View {
                 TextField("Reminder Message", text: $customReminderMessage)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.top, 5)
+                
+                Picker("Menu Bar Icon", selection: $menuBarIconName) {
+                    ForEach(availableIcons, id: \.self) { icon in
+                        HStack {
+                            Image(systemName: icon)
+                            Text(icon)
+                        }.tag(icon)
+                    }
+                }
+                .padding(.top, 5)
             }
             
             Divider().padding(.vertical, 5)

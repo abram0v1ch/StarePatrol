@@ -19,7 +19,7 @@ struct StarePatrolApp: App {
                     .foregroundColor(.yellow)
             } else {
                 HStack(spacing: 4) {
-                    Image(systemName: "eyes")
+                    Image(systemName: timerManager.menuBarIconName)
                     Text(timerManager.timeString)
                         .font(.body.monospacedDigit())
                 }
