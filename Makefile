@@ -1,8 +1,8 @@
 APP_NAME = StarePatrol
 BUNDLE_ID = com.vasyl.StarePatrol
-BUILD_DIR = build
-BUNDLE_DIR_NAME = StarePatrolApp.app
-APP_DIR = $(BUILD_DIR)/$(BUNDLE_DIR_NAME)
+BUILD_DIR = dist
+BUNDLE = StarePatrolApp
+APP_DIR = $(BUILD_DIR)/$(BUNDLE).app
 MACOS_DIR = $(APP_DIR)/Contents/MacOS
 RESOURCES_DIR = $(APP_DIR)/Contents/Resources
 SWIFT_FILES = $(wildcard Sources/*.swift)
@@ -17,7 +17,7 @@ build:
 	mkdir -p $(RESOURCES_DIR)
 	
 	# Compile Swift files
-	$(SWIFT_COMPILER) $(SWIFT_FLAGS) $(SWIFT_FILES) -o $(MACOS_DIR)/StarePatrol
+	$(SWIFT_COMPILER) $(SWIFT_FLAGS) $(SWIFT_FILES) -o $(MACOS_DIR)/$(APP_NAME)
 	
 	# Copy Info.plist
 	cp Info.plist $(APP_DIR)/Contents/Info.plist
@@ -25,14 +25,13 @@ build:
 	# Copy AppIcon directly
 	cp icon.png $(RESOURCES_DIR)/AppIcon.png
 	
-	# Copy assets directly if any (we will use system SF symbols mostly initially)
-	
 	# Sign the app to avoid security warnings when running locally
 	codesign --force --deep --sign - $(APP_DIR)
 	
 	@echo "Build complete. Run with: open $(APP_DIR)"
 
 clean:
+	-osascript -e 'tell application "StarePatrol" to quit' 2>/dev/null; sleep 1
 	rm -rf $(APP_DIR)
 
 .PHONY: all build clean
