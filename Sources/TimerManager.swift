@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 
 class TimerManager: ObservableObject {
     @Published var timeRemaining: TimeInterval

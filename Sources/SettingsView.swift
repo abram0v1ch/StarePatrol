@@ -19,6 +19,10 @@ struct SettingsView: View {
             
             Divider()
             
+            Button("Preferences...") {
+                PreferencesWindowManager.shared.showPreferences()
+            }
+            
             Button("Reset Timer") {
                 timerManager.resetTimer()
             }
