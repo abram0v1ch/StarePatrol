@@ -5,14 +5,20 @@ class TimerManager: ObservableObject {
     @Published var timeRemaining: TimeInterval
     @Published var isBreaking: Bool = false
     
-    // Default 20 minutes (1200 seconds) for work, 20 seconds for break
-    let workInterval: TimeInterval = 1200
-    let breakInterval: TimeInterval = 20
+    // UserDefaults via AppStorage
+    @AppStorage("workIntervalMinutes") var workIntervalMinutes: Int = 20
+    @AppStorage("breakIntervalSeconds") var breakIntervalSeconds: Int = 20
+    
+    var workInterval: TimeInterval { TimeInterval(workIntervalMinutes * 60) }
+    var breakInterval: TimeInterval { TimeInterval(breakIntervalSeconds) }
     
     private var timer: AnyCancellable?
     
     init() {
-        self.timeRemaining = 1200 // Start with full work interval
+        // We can't immediately use self.workInterval before initialization in swift strict concurrency sometimes,
+        // but here it's safe after super.init, or we just pull from UserDefaults directly.
+        let initialWorkInterval = TimeInterval(UserDefaults.standard.integer(forKey: "workIntervalMinutes") > 0 ? UserDefaults.standard.integer(forKey: "workIntervalMinutes") * 60 : 1200)
+        self.timeRemaining = initialWorkInterval // Start with full work interval
         startTimer()
     }
     
