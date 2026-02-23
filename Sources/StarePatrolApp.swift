@@ -14,17 +14,12 @@ struct StarePatrolApp: App {
             SettingsView()
                 .environmentObject(timerManager)
         } label: {
-            if timerManager.isBreaking {
-                Image(systemName: "eyes.inverse")
-                    .foregroundColor(.yellow)
-            } else {
-                HStack(spacing: 4) {
-                    Image(systemName: timerManager.menuBarIconName)
-                    Text(timerManager.timeString)
-                        .font(.body.monospacedDigit())
-                }
-                .frame(width: 80, alignment: .leading)
+            HStack(spacing: 4) {
+                Image(systemName: timerManager.isBreaking ? "eyes.inverse" : timerManager.menuBarIconName)
+                Text(timerManager.isBreaking ? "Break!" : timerManager.timeString)
+                    .font(.body.monospacedDigit())
             }
+            .frame(width: 90, alignment: .leading)
         }
     }
     

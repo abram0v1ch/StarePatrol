@@ -2,31 +2,32 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var timerManager: TimerManager
-    @State private var pauseSliderValue: Double = 15
+    @State private var pauseMinutes: Int = 15
     
     var body: some View {
+        // Status row
         if timerManager.isBreaking {
-            Text("Take a break! Look 20ft away.")
+            Text("👀 Break time! Look 20ft away.")
+                .foregroundColor(.orange)
         } else if timerManager.isPaused {
-            Text("Paused for \(timerManager.timeString)")
+            Text("⏸ Paused – \(timerManager.timeString) left")
             Button("Resume Work") {
                 timerManager.resumeTimer()
             }
         } else {
-            Text("Next break in: \(timerManager.timeString)")
+            Text("Next break in \(timerManager.timeString)")
         }
         
         Divider()
         
-        VStack(alignment: .leading, spacing: 5) {
-            Text("Pause for \(Int(pauseSliderValue)) mins")
-                .font(.caption)
-            HStack {
-                Slider(value: $pauseSliderValue, in: 5...60, step: 5)
-                Button("Pause") {
-                    timerManager.pauseApp(minutes: Int(pauseSliderValue))
-                }
+        // Custom pause duration selector
+        VStack(alignment: .leading, spacing: 6) {
+            Stepper("Pause: \(pauseMinutes) min", value: $pauseMinutes, in: 1...120)
+            Button("Pause Now") {
+                timerManager.pauseApp(minutes: pauseMinutes)
             }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
         }
         .frame(width: 220)
         .padding(.horizontal, 10)
@@ -34,7 +35,7 @@ struct SettingsView: View {
         
         Divider()
         
-        Button("Preferences...") {
+        Button("Preferences…") {
             PreferencesWindowManager.shared.showPreferences(timerManager: timerManager)
         }
         

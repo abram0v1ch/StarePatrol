@@ -2,7 +2,6 @@ import Foundation
 import Combine
 import SwiftUI
 import UserNotifications
-import SwiftUI
 
 class TimerManager: ObservableObject {
     @Published var timeRemaining: TimeInterval
@@ -182,6 +181,7 @@ class TimerManager: ObservableObject {
         let content = UNMutableNotificationContent()
         content.title = "StarePatrol"
         content.body = customReminderMessage
+        content.sound = .default
         content.categoryIdentifier = "BREAK_REMINDER"
         
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
@@ -198,10 +198,10 @@ class TimerManager: ObservableObject {
         }
         
         center.setNotificationCategories([category])
-        
-        center.requestAuthorization(options: [.alert]) { granted, _ in
-            if granted {
-                center.add(request)
+        // Just add the notification — auth was already requested at app launch
+        center.add(request) { error in
+            if let error = error {
+                print("Failed to schedule notification: \(error)")
             }
         }
     }

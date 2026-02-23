@@ -122,8 +122,13 @@ struct PreferencesView: View {
                     
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Reminder Message:")
-                        TextField("Time to rest your eyes! Look 20 feet away.", text: $customReminderMessage)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        TextEditor(text: $customReminderMessage)
+                            .frame(height: 60)
+                            .font(.body)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            )
                     }
                 }
                 .padding(.vertical, 10)
