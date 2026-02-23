@@ -1,4 +1,5 @@
 import SwiftUI
+import ServiceManagement
 
 struct PreferencesView: View {
     @ObservedObject var timerManager: TimerManager
@@ -10,6 +11,7 @@ struct PreferencesView: View {
     @AppStorage("isAppEnabled") private var isAppEnabled: Bool = true
     @AppStorage("useFullScreenPopup") private var useFullScreenPopup: Bool = true
     @AppStorage("selectedSoundName") private var selectedSoundName: String = "Glass"
+    @AppStorage("launchAtLogin") private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     
     let availableSounds = ["Glass", "Ping", "Purr", "Funk", "Basso", "Hero", "Pop", "Submarine"]
     
@@ -36,6 +38,18 @@ struct PreferencesView: View {
     private var generalTab: some View {
         Form {
             Section(header: Text("General").font(.headline)) {
+                Toggle("Launch StarePatrol at Login", isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) { _ in
+                        do {
+                            if launchAtLogin {
+                                try SMAppService.mainApp.register()
+                            } else {
+                                try SMAppService.mainApp.unregister()
+                            }
+                        } catch {
+                            print("Failed to update SMAppService: \(error.localizedDescription)")
+                        }
+                    }
                 Toggle("Enable StarePatrol", isOn: $isAppEnabled)
                     .onChange(of: isAppEnabled) { _ in timerManager.settingsUpdated() }
             }
