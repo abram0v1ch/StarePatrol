@@ -48,11 +48,11 @@ struct PreferencesView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("General").font(.headline)
                     Toggle("Enable StarePatrol", isOn: $isAppEnabled)
-                        .onChange(of: isAppEnabled) { _ in timerManager.settingsUpdated() }
+                        .onChange(of: isAppEnabled) { timerManager.settingsUpdated() }
                         .font(.headline)
                         
                     Toggle("Launch StarePatrol at Login", isOn: $launchAtLogin)
-                        .onChange(of: launchAtLogin) { _ in
+                        .onChange(of: launchAtLogin) {
                             do {
                                 if launchAtLogin { try SMAppService.mainApp.register() }
                                 else { try SMAppService.mainApp.unregister() }
@@ -60,7 +60,7 @@ struct PreferencesView: View {
                         }
                     
                     Toggle("Strict Mode (Disable skip/snooze)", isOn: $isStrictMode)
-                        .onChange(of: isStrictMode) { _ in timerManager.settingsUpdated() }
+                        .onChange(of: isStrictMode) { timerManager.settingsUpdated() }
                 }
                 .padding(.vertical, 10)
                 
@@ -73,13 +73,13 @@ struct PreferencesView: View {
                     VStack(alignment: .leading) {
                         Text("Work Duration: \(workIntervalMinutes) minutes").font(.subheadline)
                         Slider(value: Binding(get: { Double(workIntervalMinutes) }, set: { workIntervalMinutes = Int($0) }), in: 1...60, step: 1)
-                            .onChange(of: workIntervalMinutes) { _ in timerManager.settingsUpdated() }
+                            .onChange(of: workIntervalMinutes) { timerManager.settingsUpdated() }
                     }
                     
                     VStack(alignment: .leading) {
                         Text("Break Duration: \(breakIntervalSeconds) seconds").font(.subheadline)
                         Slider(value: Binding(get: { Double(breakIntervalSeconds) }, set: { breakIntervalSeconds = Int($0) }), in: 5...300, step: 5)
-                            .onChange(of: breakIntervalSeconds) { _ in timerManager.settingsUpdated() }
+                            .onChange(of: breakIntervalSeconds) { timerManager.settingsUpdated() }
                     }
                 }
                 .padding(.vertical, 10)
@@ -99,7 +99,7 @@ struct PreferencesView: View {
                             ForEach(availableSounds, id: \.self) { sound in Text(sound).tag(sound) }
                         }
                         .pickerStyle(.menu)
-                        .onChange(of: selectedSoundName) { _ in SoundManager.shared.previewSound(selectedSoundName) }
+                        .onChange(of: selectedSoundName) { SoundManager.shared.previewSound(selectedSoundName) }
                         .padding(.leading, 20)
                     }
                     

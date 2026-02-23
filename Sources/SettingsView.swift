@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var timerManager: TimerManager
-    @State private var pauseMinutes: Int = 15
+    @State private var pauseMinutes: Double = 15
     
     var body: some View {
         // Status row
@@ -20,18 +20,24 @@ struct SettingsView: View {
         
         Divider()
         
-        // Custom pause duration selector
+        // Custom pause duration selector with slider
         VStack(alignment: .leading, spacing: 6) {
-            Stepper("Pause: \(pauseMinutes) min", value: $pauseMinutes, in: 1...120)
-            Button("Pause Now") {
-                timerManager.pauseApp(minutes: pauseMinutes)
+            Text("Pause for \(Int(pauseMinutes)) min")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            HStack(spacing: 8) {
+                Slider(value: $pauseMinutes, in: 1...120, step: 1)
+                    .frame(minWidth: 120)
+                Button("Pause") {
+                    timerManager.pauseApp(minutes: Int(pauseMinutes))
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
         }
-        .frame(width: 220)
+        .frame(width: 240)
         .padding(.horizontal, 10)
-        .padding(.vertical, 5)
+        .padding(.vertical, 6)
         
         Divider()
         

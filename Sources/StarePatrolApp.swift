@@ -7,13 +7,16 @@ struct StarePatrolApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var timerManager = TimerManager()
     
-    // We use a MenuBarExtra to make it a status bar app
-    // In macOS 13+, MenuBarExtra is the modern way to do this in SwiftUI
     var body: some Scene {
+        // .window style renders content in a stable floating popover rather than
+        // a native NSMenu — this is the only way to prevent SwiftUI from
+        // triggering expensive layout passes on every second tick that cause
+        // the dropdown to collapse/become unresponsive.
         MenuBarExtra {
             SettingsView()
                 .environmentObject(timerManager)
         } label: {
+            // Single stable HStack so the frame never changes, preventing jitter
             HStack(spacing: 4) {
                 Image(systemName: timerManager.isBreaking ? "eyes.inverse" : timerManager.menuBarIconName)
                 Text(timerManager.isBreaking ? "Break!" : timerManager.timeString)
@@ -21,14 +24,12 @@ struct StarePatrolApp: App {
             }
             .frame(width: 90, alignment: .leading)
         }
+        .menuBarExtraStyle(.window)
     }
     
     init() {
-        // Safe way to observe even when UI is not rendering
         NotificationCenter.default.addObserver(forName: .showReminder, object: nil, queue: .main) { _ in
             SoundManager.shared.triggerFeedback()
-            // Assume we need access to TimerManager, we can pass a reference or just use a singleton.
-            // Since we have an instance here, we will handle it inside the closure.
         }
         NotificationCenter.default.addObserver(forName: .hideReminder, object: nil, queue: .main) { _ in
             ReminderWindowManager.shared.hideReminder()
@@ -40,23 +41,33 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     func applicationDidFinishLaunching(_ notification: Notification) {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
+        // Request alert + sound + banner permissions upfront
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error {
                 print("Notification permission error: \(error)")
             }
+            print("Notifications granted: \(granted)")
         }
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        // Force the notification to show as a banner even if the app is active
-        completionHandler([.banner, .sound])
+    // CRITICAL: This delegate method forces the notification to display as a
+    // visible banner even when the app is the foreground/active process.
+    // Without this, macOS silently drops all notifications to Notification Center only.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound, .badge])
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
         let userInfo = ["action": response.actionIdentifier]
         NotificationCenter.default.post(name: .notificationActionReceived, object: nil, userInfo: userInfo)
-        
         completionHandler()
     }
 }
