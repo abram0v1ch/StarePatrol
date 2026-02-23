@@ -292,14 +292,25 @@ struct StatisticsSection: View {
 
 struct AboutSection: View {
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 16) {
             Spacer()
-            Image(systemName: "eyes").font(.system(size: 60)).foregroundColor(.accentColor)
+            // Use the real app icon from the bundle
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 96, height: 96)
+                .cornerRadius(20)
+                .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
             VStack(spacing: 4) {
                 Text("StarePatrol").font(.title2.bold())
                 Text("Version 1.0").foregroundColor(.secondary).font(.subheadline)
                 Text("Protect your eyes with the 20-20-20 rule.")
-                    .foregroundColor(.secondary).font(.caption).padding(.top, 4)
+                    .foregroundColor(.secondary).font(.caption).padding(.top, 2)
+            }
+            Divider().padding(.horizontal, 40)
+            VStack(spacing: 2) {
+                Text("Made by Vasyl Abramovych").font(.footnote).foregroundColor(.secondary)
+                Link("github.com/abram0v1ch", destination: URL(string: "https://github.com/abram0v1ch")!)
+                    .font(.footnote)
             }
             Spacer()
         }
