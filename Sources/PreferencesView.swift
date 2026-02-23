@@ -10,7 +10,27 @@ struct PreferencesView: View {
     @AppStorage("isAppEnabled") private var isAppEnabled: Bool = true
     @AppStorage("useFullScreenPopup") private var useFullScreenPopup: Bool = true
     
+    // Stats
+    @AppStorage("totalBreaksTaken") private var totalBreaksTaken: Int = 0
+    @AppStorage("totalBreaksSkipped") private var totalBreaksSkipped: Int = 0
+    
     var body: some View {
+        TabView {
+            generalTab
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape")
+                }
+            
+            statsTab
+                .tabItem {
+                    Label("Statistics", systemImage: "chart.bar.fill")
+                }
+        }
+        .padding()
+        .frame(width: 450, height: 420)
+    }
+    
+    private var generalTab: some View {
         Form {
             Section(header: Text("General").font(.headline)) {
                 Toggle("Enable StarePatrol", isOn: $isAppEnabled)
@@ -54,7 +74,43 @@ struct PreferencesView: View {
             }
             .disabled(!isAppEnabled)
         }
+    }
+    
+    private var statsTab: some View {
+        VStack(spacing: 20) {
+            Text("Your Eye Rest Stats 👁️")
+                .font(.title2)
+                .padding(.bottom, 10)
+            
+            HStack(spacing: 50) {
+                VStack {
+                    Text("\(totalBreaksTaken)")
+                        .font(.system(size: 40, weight: .bold, design: .rounded))
+                        .foregroundColor(.green)
+                    Text("Breaks Taken")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                VStack {
+                    Text("\(totalBreaksSkipped)")
+                        .font(.system(size: 40, weight: .bold, design: .rounded))
+                        .foregroundColor(.orange)
+                    Text("Breaks Skipped")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            Button("Reset Statistics") {
+                totalBreaksTaken = 0
+                totalBreaksSkipped = 0
+            }
+            .buttonStyle(.link)
+            .padding(.bottom)
+        }
         .padding(30)
-        .frame(width: 450, height: 420)
     }
 }

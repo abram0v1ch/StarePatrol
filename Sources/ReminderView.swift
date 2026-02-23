@@ -25,8 +25,8 @@ struct ReminderView: View {
                 .font(.title3)
                 .foregroundColor(.white.opacity(0.8))
             
-            Button("Skip") {
-                timerManager.resetTimer()
+            Button("Skip Break") {
+                timerManager.skipBreak()
             }
             .buttonStyle(.borderedProminent)
             .tint(.white.opacity(0.3))

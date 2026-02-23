@@ -14,6 +14,10 @@ class TimerManager: ObservableObject {
     @AppStorage("isAppEnabled") var isAppEnabled: Bool = true
     @AppStorage("useFullScreenPopup") var useFullScreenPopup: Bool = true
     
+    // Statistics
+    @AppStorage("totalBreaksTaken") var totalBreaksTaken: Int = 0
+    @AppStorage("totalBreaksSkipped") var totalBreaksSkipped: Int = 0
+    
     var workInterval: TimeInterval { TimeInterval(workIntervalMinutes * 60) }
     var breakInterval: TimeInterval { TimeInterval(breakIntervalSeconds) }
     
@@ -62,6 +66,22 @@ class TimerManager: ObservableObject {
     func resetTimer() {
         timeRemaining = isBreaking ? breakInterval : workInterval
         startTimer()
+    }
+    
+    func skipBreak() {
+        if isBreaking {
+            totalBreaksSkipped += 1
+            isBreaking = false
+            resetTimer()
+        }
+    }
+    
+    func completeBreak() {
+        if isBreaking {
+            totalBreaksTaken += 1
+            isBreaking = false
+            resetTimer()
+        }
     }
     
     private func tick() {
