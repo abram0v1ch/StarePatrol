@@ -93,6 +93,8 @@ class TimerManager: ObservableObject {
         if isBreaking {
             totalBreaksSkipped += 1
             isBreaking = false
+            playBreakEndSoundIfNeeded()
+            SoundManager.shared.performHapticFeedback()
             ReminderWindowManager.shared.hideReminder()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
             resetTimer()
@@ -103,10 +105,18 @@ class TimerManager: ObservableObject {
         if isBreaking {
             totalBreaksTaken += 1
             isBreaking = false
+            playBreakEndSoundIfNeeded()
+            SoundManager.shared.performHapticFeedback()
             ReminderWindowManager.shared.hideReminder()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
             resetTimer()
         }
+    }
+    
+    private func playBreakEndSoundIfNeeded() {
+        guard UserDefaults.standard.bool(forKey: "breakEndSoundEnabled") else { return }
+        let snd = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
+        SoundManager.shared.previewSound(snd)
     }
     
     func pauseApp(minutes: Int) {
@@ -153,23 +163,24 @@ class TimerManager: ObservableObject {
                 isPaused = false
                 resetTimer()
             } else {
-                let wasWorking = !isBreaking
+                let wasBreaking = isBreaking
                 isBreaking.toggle()
                 timeRemaining = isBreaking ? breakInterval : workInterval
                 
-                // Work→break: play work-end sound if enabled.
-                // Skip break-start sound in showReminderIfNeeded to avoid
-                // two NSSound.play() calls on the same shared instance (they cancel each other).
-                var playedWorkEndSound = false
-                if isBreaking && wasWorking {
-                    let workEndOn = UserDefaults.standard.bool(forKey: "isWorkEndSoundEnabled")
-                    if workEndOn {
-                        let snd = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
+                let snd = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
+                if isBreaking && !wasBreaking {
+                    // work → break: play break-START sound
+                    if UserDefaults.standard.bool(forKey: "breakStartSoundEnabled") {
                         SoundManager.shared.previewSound(snd)
-                        playedWorkEndSound = true
+                    }
+                } else if !isBreaking && wasBreaking {
+                    // break → work: play break-END sound
+                    if UserDefaults.standard.bool(forKey: "breakEndSoundEnabled") {
+                        SoundManager.shared.previewSound(snd)
                     }
                 }
-                showReminderIfNeeded(skipSound: playedWorkEndSound)
+                SoundManager.shared.performHapticFeedback()
+                showReminderIfNeeded()
             }
         }
     }
@@ -181,15 +192,8 @@ class TimerManager: ObservableObject {
         return String(format: "%02d:%02d", minutes, seconds)
     }
     
-    private func showReminderIfNeeded(skipSound: Bool = false) {
+    private func showReminderIfNeeded() {
         if isBreaking {
-            // Only play break-start sound if work-end sound didn't already fire this tick
-            if !skipSound {
-                SoundManager.shared.triggerFeedback()
-            } else {
-                // Still do haptics even if we skipped the sound
-                SoundManager.shared.performHapticFeedback()
-            }
             switch notificationMode {
             case "fullscreen":
                 ReminderWindowManager.shared.showReminder(timerManager: self)

@@ -177,9 +177,9 @@ struct IntervalsSection: View {
 struct NotificationsSection: View {
     @ObservedObject var timerManager: TimerManager
     @AppStorage("notificationMode") private var notificationMode: String = "fullscreen"
-    @AppStorage("isSoundEnabled") private var isSoundEnabled: Bool = true
-    @AppStorage("isWorkEndSoundEnabled") private var isWorkEndSoundEnabled: Bool = false
-    @AppStorage("selectedSoundName") private var selectedSoundName: String = "Glass"
+    @AppStorage("breakStartSoundEnabled") private var breakStartSoundEnabled: Bool = true
+    @AppStorage("breakEndSoundEnabled") private var breakEndSoundEnabled: Bool = true
+    @AppStorage("isWorkEndSoundEnabled") private var isWorkEndSoundEnabled: Bool = false // legacy, unused
     @AppStorage("isHapticsEnabled") private var isHapticsEnabled: Bool = true
     @AppStorage("isAppEnabled") private var isAppEnabled: Bool = true
     let availableSounds = ["Glass", "Ping", "Purr", "Funk", "Basso", "Hero", "Pop", "Submarine"]
@@ -201,11 +201,11 @@ struct NotificationsSection: View {
             }
             SectionCard {
                 PrefRow(icon: "speaker.wave.2", color: .orange) {
-                    Toggle("Sound at break start", isOn: $isSoundEnabled)
+                    Toggle("Sound at break start", isOn: $breakStartSoundEnabled)
                 }
                 Divider()
                 PrefRow(icon: "bell.badge", color: .orange) {
-                    Toggle("Sound when work period ends", isOn: $isWorkEndSoundEnabled)
+                    Toggle("Sound at break end", isOn: $breakEndSoundEnabled)
                 }
                 Divider()
                 PrefRow(icon: "music.note", color: .orange) {

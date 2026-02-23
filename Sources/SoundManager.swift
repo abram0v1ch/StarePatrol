@@ -8,6 +8,8 @@ class SoundManager {
         // Set default values if not explicitly set yet
         UserDefaults.standard.register(defaults: [
             "isSoundEnabled": true,
+            "breakStartSoundEnabled": true,
+            "breakEndSoundEnabled": true,
             "isHapticsEnabled": true,
             "selectedSoundName": "Glass"
         ])
