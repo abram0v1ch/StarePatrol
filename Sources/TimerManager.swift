@@ -12,14 +12,14 @@ class TimerManager: ObservableObject {
     @AppStorage("workIntervalMinutes") var workIntervalMinutes: Int = 20
     @AppStorage("breakIntervalSeconds") var breakIntervalSeconds: Int = 20
     @AppStorage("isAppEnabled") var isAppEnabled: Bool = true
-    @AppStorage("useFullScreenPopup") var useFullScreenPopup: Bool = true
+    @AppStorage("notificationMode") var notificationMode: String = "fullscreen"
     
     // Statistics
     @AppStorage("totalBreaksTaken") var totalBreaksTaken: Int = 0
     @AppStorage("totalBreaksSkipped") var totalBreaksSkipped: Int = 0
     
     // Customization
-    @AppStorage("customReminderMessage") var customReminderMessage: String = "Time to rest your eyes! Look 20 feet away."
+    @AppStorage("customReminderMessage") var customReminderMessage: String = "Rest your eyes — look 20ft away."
     @AppStorage("menuBarIconName") var menuBarIconName: String = "eyes"
     @AppStorage("isStrictMode") var isStrictMode: Bool = false
     
@@ -34,7 +34,7 @@ class TimerManager: ObservableObject {
             "workIntervalMinutes": 20,
             "breakIntervalSeconds": 20,
             "isAppEnabled": true,
-            "useFullScreenPopup": true
+            "notificationMode": "fullscreen"
         ])
         
         let initialWorkInterval = TimeInterval(UserDefaults.standard.integer(forKey: "workIntervalMinutes") > 0 ? UserDefaults.standard.integer(forKey: "workIntervalMinutes") * 60 : 1200)
@@ -165,14 +165,14 @@ class TimerManager: ObservableObject {
     
     private func showReminderIfNeeded() {
         if isBreaking {
-            if useFullScreenPopup {
+            switch notificationMode {
+            case "fullscreen":
                 ReminderWindowManager.shared.showReminder(timerManager: self)
-            } else {
-                // Use our own floating banner — always visible, not subject to
-                // macOS Notification Center delivery settings.
+            case "banner":
                 BannerWindowManager.shared.show(timerManager: self)
-                // Also fire a UNNotification as a supplemental alert
-                sendLocalNotification()
+                sendLocalNotification() // supplemental
+            default: // "none"
+                break
             }
             NotificationCenter.default.post(name: .showReminder, object: nil)
         } else {
