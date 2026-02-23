@@ -14,7 +14,6 @@ struct StarePatrolApp: App {
             SettingsView()
                 .environmentObject(timerManager)
         } label: {
-            // Dynamic labeling based on time remaining or state
             if timerManager.isBreaking {
                 Image(systemName: "eyes.inverse")
                     .foregroundColor(.yellow)
@@ -27,6 +26,7 @@ struct StarePatrolApp: App {
                 .frame(width: 80, alignment: .leading)
             }
         }
+        .menuBarExtraStyle(.window)
     }
     
     init() {
@@ -44,7 +44,13 @@ struct StarePatrolApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        UNUserNotificationCenter.current().delegate = self
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if let error = error {
+                print("Notification permission error: \(error)")
+            }
+        }
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {

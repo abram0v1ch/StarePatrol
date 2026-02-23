@@ -20,7 +20,7 @@ build:
 	cp Info.plist $(APP_DIR)/Contents/Info.plist
 	
 	# Copy AppIcon directly
-	cp AppIcon.icns $(RESOURCES_DIR)/AppIcon.icns
+	cp icon.png $(RESOURCES_DIR)/AppIcon.png
 	
 	# Copy assets directly if any (we will use system SF symbols mostly initially)
 	
