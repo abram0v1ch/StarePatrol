@@ -187,41 +187,7 @@ struct PreferencesView: View {
                     .foregroundColor(.secondary)
             }
             
-            Text("Your Eye Rest Stats 👁️")
-                .font(.title2)
-            
-            HStack(spacing: 50) {
-                VStack {
-                    Text("\(totalBreaksTaken)")
-                        .font(.system(size: 40, weight: .bold, design: .rounded))
-                        .foregroundColor(.green)
-                    Text("Breaks Taken")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                
-                VStack {
-                    Text("\(totalBreaksSkipped)")
-                        .font(.system(size: 40, weight: .bold, design: .rounded))
-                        .foregroundColor(.orange)
-                    Text("Breaks Skipped")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .padding()
-            .background(Color(NSColor.controlBackgroundColor))
-            .cornerRadius(15)
-            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-            
             Spacer()
-            
-            Button("Reset Statistics") {
-                totalBreaksTaken = 0
-                totalBreaksSkipped = 0
-            }
-            .buttonStyle(.link)
-            .padding(.bottom)
         }
         .padding(30)
     }

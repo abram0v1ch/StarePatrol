@@ -7,6 +7,7 @@ import SwiftUI
 class TimerManager: ObservableObject {
     @Published var timeRemaining: TimeInterval
     @Published var isBreaking: Bool = false
+    @Published var isPaused: Bool = false
     
     // UserDefaults via AppStorage
     @AppStorage("workIntervalMinutes") var workIntervalMinutes: Int = 20
@@ -104,10 +105,25 @@ class TimerManager: ObservableObject {
         }
     }
     
+    func pauseApp(minutes: Int) {
+        isBreaking = false
+        isPaused = true
+        timeRemaining = TimeInterval(minutes * 60)
+        ReminderWindowManager.shared.hideReminder()
+        NotificationCenter.default.post(name: .hideReminder, object: nil)
+        startTimer()
+    }
+    
+    func resumeTimer() {
+        isPaused = false
+        resetTimer()
+    }
+    
     func snoozeBreak(minutes: Int = 5) {
         guard !isStrictMode else { return }
         if isBreaking {
             isBreaking = false
+            isPaused = true
             timeRemaining = TimeInterval(minutes * 60)
             ReminderWindowManager.shared.hideReminder()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
@@ -129,12 +145,15 @@ class TimerManager: ObservableObject {
         if timeRemaining > 0 {
             timeRemaining -= 1
         } else {
-            // Switch state
-            isBreaking.toggle()
-            timeRemaining = isBreaking ? breakInterval : workInterval
-            
-            // Notify when state changes (e.g. show popup)
-            showReminderIfNeeded()
+            if isPaused {
+                isPaused = false
+                resetTimer()
+            } else {
+                // Switch state
+                isBreaking.toggle()
+                timeRemaining = isBreaking ? breakInterval : workInterval
+                showReminderIfNeeded()
+            }
         }
     }
     
@@ -142,11 +161,7 @@ class TimerManager: ObservableObject {
     var timeString: String {
         let minutes = Int(timeRemaining) / 60
         let seconds = Int(timeRemaining) % 60
-        if minutes > 0 {
-            return String(format: "%d:%02d", minutes, seconds)
-        } else {
-            return String(format: "%d", seconds)
-        }
+        return String(format: "%02d:%02d", minutes, seconds)
     }
     
     private func showReminderIfNeeded() {

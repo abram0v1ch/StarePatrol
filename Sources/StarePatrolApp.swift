@@ -26,7 +26,6 @@ struct StarePatrolApp: App {
                 .frame(width: 80, alignment: .leading)
             }
         }
-        .menuBarExtraStyle(.window)
     }
     
     init() {
