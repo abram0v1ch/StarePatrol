@@ -2,10 +2,8 @@
 .clang-module-cache/
 .swift-module-cache/
 build/
+out/
 EyeReminder.app/
 StarePolice.app/
 make_icns.py
 test.swift
-dist/
-dist2/
-dist3/

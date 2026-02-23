@@ -1,6 +1,6 @@
 APP_NAME = StarePatrol
 BUNDLE_ID = com.vasyl.StarePatrol
-BUILD_DIR = dist
+BUILD_DIR = out
 BUNDLE = StarePatrolApp
 APP_DIR = $(BUILD_DIR)/$(BUNDLE).app
 MACOS_DIR = $(APP_DIR)/Contents/MacOS

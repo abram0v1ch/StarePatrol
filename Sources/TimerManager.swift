@@ -22,6 +22,9 @@ class TimerManager: ObservableObject {
     @AppStorage("customReminderMessage") var customReminderMessage: String = "Rest your eyes — look 20ft away."
     @AppStorage("menuBarIconName") var menuBarIconName: String = "eyes"
     @AppStorage("isStrictMode") var isStrictMode: Bool = false
+    @AppStorage("isSoundEnabled") var isSoundEnabled: Bool = true
+    @AppStorage("isWorkEndSoundEnabled") var isWorkEndSoundEnabled: Bool = false
+    @AppStorage("selectedSoundName") var selectedSoundName: String = "Glass"
     
     var workInterval: TimeInterval { TimeInterval(workIntervalMinutes * 60) }
     var breakInterval: TimeInterval { TimeInterval(breakIntervalSeconds) }
@@ -148,9 +151,18 @@ class TimerManager: ObservableObject {
                 isPaused = false
                 resetTimer()
             } else {
-                // Switch state
+                let wasWorking = !isBreaking
                 isBreaking.toggle()
                 timeRemaining = isBreaking ? breakInterval : workInterval
+                // Play work-end sound when transitioning work → break
+                if isBreaking && wasWorking {
+                    let workEndSound = UserDefaults.standard.bool(forKey: "isWorkEndSoundEnabled")
+                    if workEndSound {
+                        SoundManager.shared.previewSound(
+                            UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
+                        )
+                    }
+                }
                 showReminderIfNeeded()
             }
         }
@@ -168,16 +180,14 @@ class TimerManager: ObservableObject {
             switch notificationMode {
             case "fullscreen":
                 ReminderWindowManager.shared.showReminder(timerManager: self)
-            case "banner":
-                BannerWindowManager.shared.show(timerManager: self)
-                sendLocalNotification() // supplemental
+            case "notification":
+                sendLocalNotification()
             default: // "none"
                 break
             }
             NotificationCenter.default.post(name: .showReminder, object: nil)
         } else {
             ReminderWindowManager.shared.hideReminder()
-            BannerWindowManager.shared.hide()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
         }
     }
