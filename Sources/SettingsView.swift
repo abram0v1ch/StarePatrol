@@ -1,26 +1,14 @@
 import SwiftUI
 
-// Preset snap values for the pause slider (minutes); 9999 = indefinite
-let pauseSnapValues: [Double] = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120, 9999]
-
-func snapPause(_ raw: Double) -> Double {
-    pauseSnapValues.min(by: { abs($0 - raw) < abs($1 - raw) }) ?? raw
-}
-
-func formatPause(_ minutes: Double) -> String {
-    if minutes >= 9999 { return "∞" }
-    let m = Int(minutes)
-    if m >= 60 {
-        let h = m / 60
-        let rem = m % 60
-        return rem == 0 ? "\(h)h" : "\(h)h \(rem)m"
-    }
-    return "\(m)m"
-}
+// Default slider index (10 min → index 4); defined here for UI use
+private let _defaultPauseIndex: Double = defaultPauseIndex
 
 struct SettingsView: View {
     @EnvironmentObject var timerManager: TimerManager
-    @State private var pauseMinutes: Double = 15
+    // Index into pauseSnapValues — evenly spaced on the slider regardless of value magnitude
+    @State private var pauseIndex: Double = defaultPauseIndex
+
+    var currentPauseValue: Double { pauseSnapValues[Int(pauseIndex.rounded())] }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -74,28 +62,26 @@ struct SettingsView: View {
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text(formatPause(pauseMinutes))
+                    Text(formatPause(currentPauseValue))
                         .font(.system(size: 11, weight: .bold).monospacedDigit())
                         .frame(width: 44, alignment: .trailing)
                 }
                 HStack(spacing: 10) {
-                    // Snapping slider
+                    // Index-based slider: evenly spaced steps, no value-scale distortion
                     Slider(
-                        value: Binding(
-                            get: { pauseMinutes },
-                            set: { pauseMinutes = snapPause($0) }
-                        ),
-                        in: pauseSnapValues.first!...pauseSnapValues.last!
+                        value: $pauseIndex,
+                        in: 0...Double(pauseSnapValues.count - 1),
+                        step: 1
                     )
                     if timerManager.isPaused {
                         Button("Resume") { timerManager.resumeTimer() }
                             .buttonStyle(.bordered).controlSize(.small)
                     } else {
                         Button("Pause") {
-                            if pauseMinutes >= 9999 {
+                            if currentPauseValue >= 9999 {
                                 timerManager.pauseIndefinitely()
                             } else {
-                                timerManager.pauseApp(minutes: Int(pauseMinutes))
+                                timerManager.pauseApp(minutes: Int(currentPauseValue))
                             }
                         }
                         .buttonStyle(.bordered).controlSize(.small)

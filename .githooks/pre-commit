@@ -1,0 +1,20 @@
+#!/bin/sh
+# Pre-commit hook — runs the full unit test suite.
+# Installed via: make setup    (sets git core.hooksPath .githooks)
+
+set -e
+
+echo "🧪 Running tests before commit..."
+
+# Use /tmp as TMPDIR to avoid macOS module-cache permission locks
+# (same workaround as `make build`)
+TMPDIR=/tmp/xcrun_cache swift test --quiet 2>/dev/null
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Tests failed. Commit aborted."
+    echo "   Run 'make test' to see the full failure output, fix, then retry."
+    exit 1
+fi
+
+echo "✅ All tests passed."
