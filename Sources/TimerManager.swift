@@ -156,15 +156,20 @@ class TimerManager: ObservableObject {
                 let wasWorking = !isBreaking
                 isBreaking.toggle()
                 timeRemaining = isBreaking ? breakInterval : workInterval
-                // Work→break transition: play work-end sound if enabled
+                
+                // Work→break: play work-end sound if enabled.
+                // Skip break-start sound in showReminderIfNeeded to avoid
+                // two NSSound.play() calls on the same shared instance (they cancel each other).
+                var playedWorkEndSound = false
                 if isBreaking && wasWorking {
                     let workEndOn = UserDefaults.standard.bool(forKey: "isWorkEndSoundEnabled")
                     if workEndOn {
-                        let soundName = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
-                        SoundManager.shared.previewSound(soundName)
+                        let snd = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
+                        SoundManager.shared.previewSound(snd)
+                        playedWorkEndSound = true
                     }
                 }
-                showReminderIfNeeded()
+                showReminderIfNeeded(skipSound: playedWorkEndSound)
             }
         }
     }
@@ -176,10 +181,15 @@ class TimerManager: ObservableObject {
         return String(format: "%02d:%02d", minutes, seconds)
     }
     
-    private func showReminderIfNeeded() {
+    private func showReminderIfNeeded(skipSound: Bool = false) {
         if isBreaking {
-            // Play break-start sound / haptics
-            SoundManager.shared.triggerFeedback()
+            // Only play break-start sound if work-end sound didn't already fire this tick
+            if !skipSound {
+                SoundManager.shared.triggerFeedback()
+            } else {
+                // Still do haptics even if we skipped the sound
+                SoundManager.shared.performHapticFeedback()
+            }
             switch notificationMode {
             case "fullscreen":
                 ReminderWindowManager.shared.showReminder(timerManager: self)
