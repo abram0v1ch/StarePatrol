@@ -1,8 +1,9 @@
-import SwiftUI
 import Combine
+import UserNotifications
 
 @main
 struct StarePatrolApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var timerManager = TimerManager()
     
     // We use a MenuBarExtra to make it a status bar app
@@ -29,6 +30,15 @@ struct StarePatrolApp: App {
         // but since we are targeting macOS 14+, it works if attached to an always-alive object.
         // Even safer: we can just attach it to the timerManager init, but keeping it here is SwiftUI-native.
         // Actually, we'll just handle it directly from TimerManager to be safe even when menu is closed.
+        .onReceive(NotificationCenter.default.publisher(for: .notificationActionReceived)) { notification in
+            if let action = notification.userInfo?["action"] as? String {
+                if action == "SNOOZE_ACTION" {
+                    timerManager.snoozeBreak(minutes: 5)
+                } else if action == "SKIP_ACTION" {
+                    timerManager.skipBreak()
+                }
+            }
+        }
     }
     
     init() {
@@ -42,4 +52,22 @@ struct StarePatrolApp: App {
             ReminderWindowManager.shared.hideReminder()
         }
     }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        UNUserNotificationCenter.current().delegate = self
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        
+        let userInfo = ["action": response.actionIdentifier]
+        NotificationCenter.default.post(name: .notificationActionReceived, object: nil, userInfo: userInfo)
+        
+        completionHandler()
+    }
+}
+
+extension Notification.Name {
+    static let notificationActionReceived = Notification.Name("notificationActionReceived")
 }

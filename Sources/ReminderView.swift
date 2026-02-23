@@ -25,11 +25,19 @@ struct ReminderView: View {
                 .font(.title3)
                 .foregroundColor(.white.opacity(0.8))
             
-            Button("Skip Break") {
-                timerManager.skipBreak()
+            HStack(spacing: 20) {
+                Button("Snooze (5m)") {
+                    timerManager.snoozeBreak()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.white.opacity(0.3))
+                
+                Button("Skip Break") {
+                    timerManager.skipBreak()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.white.opacity(0.3))
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.white.opacity(0.3))
             .foregroundColor(.white)
             .padding(.top, 20)
         }

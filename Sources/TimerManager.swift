@@ -84,6 +84,16 @@ class TimerManager: ObservableObject {
         }
     }
     
+    func snoozeBreak(minutes: Int = 5) {
+        if isBreaking {
+            isBreaking = false
+            timeRemaining = TimeInterval(minutes * 60)
+            ReminderWindowManager.shared.hideReminder()
+            NotificationCenter.default.post(name: .hideReminder, object: nil)
+            startTimer()
+        }
+    }
+    
     private func tick() {
         guard isAppEnabled else { return }
         
@@ -128,15 +138,19 @@ class TimerManager: ObservableObject {
         let content = UNMutableNotificationContent()
         content.title = "StarePatrol"
         content.body = "Time to rest your eyes! Look 20 feet away for \(Int(breakInterval)) seconds."
-        
-        // We handle sound in SoundManager manually based on preferences, 
-        // so we don't attach sound here unless we want to duplicate it.
+        content.categoryIdentifier = "BREAK_REMINDER"
         
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert]) { granted, _ in
+        let center = UNUserNotificationCenter.current()
+        let snoozeAction = UNNotificationAction(identifier: "SNOOZE_ACTION", title: "Snooze 5 Min", options: [])
+        let skipAction = UNNotificationAction(identifier: "SKIP_ACTION", title: "Skip", options: [])
+        let category = UNNotificationCategory(identifier: "BREAK_REMINDER", actions: [snoozeAction, skipAction], intentIdentifiers: [], options: [])
+        center.setNotificationCategories([category])
+        
+        center.requestAuthorization(options: [.alert]) { granted, _ in
             if granted {
-                UNUserNotificationCenter.current().add(request)
+                center.add(request)
             }
         }
     }
