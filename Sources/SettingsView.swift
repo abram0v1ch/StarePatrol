@@ -14,7 +14,21 @@ struct SettingsView: View {
                 Text("Take a break! Look 20ft away.")
                     .foregroundColor(.orange)
             } else {
-                Text("Next break in: \(timerManager.timeString)")
+                HStack {
+                    Text("Next break in:")
+                    Spacer()
+                    Text(timerManager.timeString)
+                        .font(.body.monospacedDigit())
+                }
+            }
+            
+            Divider()
+            
+            Menu("Pause StarePatrol...") {
+                Button("Pause for 5 Minutes") { timerManager.snoozeBreak(minutes: 5) }
+                Button("Pause for 15 Minutes") { timerManager.snoozeBreak(minutes: 15) }
+                Button("Pause for 30 Minutes") { timerManager.snoozeBreak(minutes: 30) }
+                Button("Pause for 1 Hour") { timerManager.snoozeBreak(minutes: 60) }
             }
             
             Divider()

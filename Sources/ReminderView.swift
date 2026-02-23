@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ReminderView: View {
     @ObservedObject var timerManager: TimerManager
+    @AppStorage("isStrictMode") private var isStrictMode: Bool = false
     
     @State private var opac: Double = 0.0
     
@@ -27,7 +28,7 @@ struct ReminderView: View {
                 .font(.title3)
                 .foregroundColor(.white.opacity(0.8))
             
-            if !timerManager.isStrictMode {
+            if !isStrictMode {
                 HStack(spacing: 20) {
                     Button("Snooze (5m)") {
                         timerManager.snoozeBreak()
@@ -45,14 +46,16 @@ struct ReminderView: View {
                 .padding(.top, 20)
             }
         }
-        .padding(50)
+        .padding(.vertical, 60)
+        .padding(.horizontal, 40)
+        .frame(minWidth: 450)
         .background(
             RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .fill(Color.black.opacity(0.7))
-                .shadow(radius: 20)
+                .fill(Color.black.opacity(0.6))
+                .shadow(color: .black.opacity(0.3), radius: 30, x: 0, y: 15)
         )
         // Blur background to make the pop-up stand out
-        .background(VisualEffectView(material: .hudWindow, blendingMode: .behindWindow).clipShape(RoundedRectangle(cornerRadius: 30)))
+        .background(VisualEffectView(material: .popover, blendingMode: .behindWindow).clipShape(RoundedRectangle(cornerRadius: 30)))
     }
 }
 

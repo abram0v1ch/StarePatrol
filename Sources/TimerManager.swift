@@ -21,6 +21,7 @@ class TimerManager: ObservableObject {
     // Customization
     @AppStorage("customReminderMessage") var customReminderMessage: String = "Time to rest your eyes! Look 20 feet away."
     @AppStorage("menuBarIconName") var menuBarIconName: String = "eyes"
+    @AppStorage("isStrictMode") var isStrictMode: Bool = false
     
     var workInterval: TimeInterval { TimeInterval(workIntervalMinutes * 60) }
     var breakInterval: TimeInterval { TimeInterval(breakIntervalSeconds) }
@@ -41,6 +42,17 @@ class TimerManager: ObservableObject {
         
         if isAppEnabled {
             startTimer()
+        }
+        
+        // Listen for notification actions even when UI is closed
+        NotificationCenter.default.addObserver(forName: .notificationActionReceived, object: nil, queue: .main) { [weak self] notification in
+            if let action = notification.userInfo?["action"] as? String {
+                if action == "SNOOZE_ACTION" {
+                    self?.snoozeBreak(minutes: 5)
+                } else if action == "SKIP_ACTION" {
+                    self?.skipBreak()
+                }
+            }
         }
     }
     
@@ -76,6 +88,8 @@ class TimerManager: ObservableObject {
         if isBreaking {
             totalBreaksSkipped += 1
             isBreaking = false
+            ReminderWindowManager.shared.hideReminder()
+            NotificationCenter.default.post(name: .hideReminder, object: nil)
             resetTimer()
         }
     }
@@ -84,6 +98,8 @@ class TimerManager: ObservableObject {
         if isBreaking {
             totalBreaksTaken += 1
             isBreaking = false
+            ReminderWindowManager.shared.hideReminder()
+            NotificationCenter.default.post(name: .hideReminder, object: nil)
             resetTimer()
         }
     }
@@ -96,6 +112,14 @@ class TimerManager: ObservableObject {
             ReminderWindowManager.shared.hideReminder()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
             startTimer()
+        }
+    }
+    
+    func triggerDebugBreak() {
+        if !isBreaking {
+            isBreaking = true
+            timeRemaining = breakInterval
+            showReminderIfNeeded()
         }
     }
     

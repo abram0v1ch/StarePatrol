@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>StarePatrol</string>
 	<key>CFBundleIconFile</key>
-	<string>AppIcon.png</string>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.vasyl.StarePatrol</string>
 	<key>CFBundleInfoDictionaryVersion</key>

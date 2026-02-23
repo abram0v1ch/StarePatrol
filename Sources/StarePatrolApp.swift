@@ -1,3 +1,4 @@
+import SwiftUI
 import Combine
 import UserNotifications
 
@@ -26,19 +27,6 @@ struct StarePatrolApp: App {
                 .frame(width: 80, alignment: .leading)
             }
         }
-        // MenuBarExtra itself cannot easily hold onReceive that runs when menu is closed in some older macOS,
-        // but since we are targeting macOS 14+, it works if attached to an always-alive object.
-        // Even safer: we can just attach it to the timerManager init, but keeping it here is SwiftUI-native.
-        // Actually, we'll just handle it directly from TimerManager to be safe even when menu is closed.
-        .onReceive(NotificationCenter.default.publisher(for: .notificationActionReceived)) { notification in
-            if let action = notification.userInfo?["action"] as? String {
-                if action == "SNOOZE_ACTION" {
-                    timerManager.snoozeBreak(minutes: 5)
-                } else if action == "SKIP_ACTION" {
-                    timerManager.skipBreak()
-                }
-            }
-        }
     }
     
     init() {
@@ -57,6 +45,11 @@ struct StarePatrolApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         UNUserNotificationCenter.current().delegate = self
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        // Force the notification to show as a banner even if the app is active
+        completionHandler([.banner, .sound])
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
