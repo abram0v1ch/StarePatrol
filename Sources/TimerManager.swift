@@ -89,6 +89,7 @@ class TimerManager: ObservableObject {
     }
     
     func snoozeBreak(minutes: Int = 5) {
+        guard !isStrictMode else { return }
         if isBreaking {
             isBreaking = false
             timeRemaining = TimeInterval(minutes * 60)
@@ -147,9 +148,16 @@ class TimerManager: ObservableObject {
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         
         let center = UNUserNotificationCenter.current()
-        let snoozeAction = UNNotificationAction(identifier: "SNOOZE_ACTION", title: "Snooze 5 Min", options: [])
-        let skipAction = UNNotificationAction(identifier: "SKIP_ACTION", title: "Skip", options: [])
-        let category = UNNotificationCategory(identifier: "BREAK_REMINDER", actions: [snoozeAction, skipAction], intentIdentifiers: [], options: [])
+        let category: UNNotificationCategory
+        
+        if isStrictMode {
+            category = UNNotificationCategory(identifier: "BREAK_REMINDER", actions: [], intentIdentifiers: [], options: [])
+        } else {
+            let snoozeAction = UNNotificationAction(identifier: "SNOOZE_ACTION", title: "Snooze 5 Min", options: [])
+            let skipAction = UNNotificationAction(identifier: "SKIP_ACTION", title: "Skip", options: [])
+            category = UNNotificationCategory(identifier: "BREAK_REMINDER", actions: [snoozeAction, skipAction], intentIdentifiers: [], options: [])
+        }
+        
         center.setNotificationCategories([category])
         
         center.requestAuthorization(options: [.alert]) { granted, _ in

@@ -9,6 +9,7 @@ struct PreferencesView: View {
     @AppStorage("isSoundEnabled") private var isSoundEnabled: Bool = true
     @AppStorage("isHapticsEnabled") private var isHapticsEnabled: Bool = true
     @AppStorage("isAppEnabled") private var isAppEnabled: Bool = true
+    @AppStorage("isStrictMode") private var isStrictMode: Bool = false
     @AppStorage("useFullScreenPopup") private var useFullScreenPopup: Bool = true
     @AppStorage("selectedSoundName") private var selectedSoundName: String = "Glass"
     @AppStorage("launchAtLogin") private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
@@ -53,8 +54,12 @@ struct PreferencesView: View {
                             print("Failed to update SMAppService: \(error.localizedDescription)")
                         }
                     }
+                
                 Toggle("Enable StarePatrol", isOn: $isAppEnabled)
                     .onChange(of: isAppEnabled) { _ in timerManager.settingsUpdated() }
+                
+                Toggle("Strict Mode (Disable skip/snooze)", isOn: $isStrictMode)
+                    .onChange(of: isStrictMode) { _ in timerManager.settingsUpdated() }
                 
                 TextField("Reminder Message", text: $customReminderMessage)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
