@@ -168,11 +168,16 @@ class TimerManager: ObservableObject {
             if useFullScreenPopup {
                 ReminderWindowManager.shared.showReminder(timerManager: self)
             } else {
+                // Use our own floating banner — always visible, not subject to
+                // macOS Notification Center delivery settings.
+                BannerWindowManager.shared.show(timerManager: self)
+                // Also fire a UNNotification as a supplemental alert
                 sendLocalNotification()
             }
             NotificationCenter.default.post(name: .showReminder, object: nil)
         } else {
             ReminderWindowManager.shared.hideReminder()
+            BannerWindowManager.shared.hide()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
         }
     }

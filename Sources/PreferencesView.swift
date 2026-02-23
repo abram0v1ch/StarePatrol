@@ -13,7 +13,7 @@ struct PreferencesView: View {
     @AppStorage("useFullScreenPopup") private var useFullScreenPopup: Bool = true
     @AppStorage("selectedSoundName") private var selectedSoundName: String = "Glass"
     @AppStorage("launchAtLogin") private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
-    @AppStorage("customReminderMessage") private var customReminderMessage: String = "Time to rest your eyes! Look 20 feet away."
+    @AppStorage("customReminderMessage") private var customReminderMessage: String = "👁 Time to look away — stare at something 20 feet away for 20 seconds."
     @AppStorage("menuBarIconName") private var menuBarIconName: String = "eyes"
     
     let availableSounds = ["Glass", "Ping", "Purr", "Funk", "Basso", "Hero", "Pop", "Submarine"]
@@ -121,7 +121,15 @@ struct PreferencesView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("Reminder Message:")
+                        HStack {
+                            Text("Reminder Message:")
+                            Spacer()
+                            Button("Reset to default") {
+                                customReminderMessage = "👁 Time to look away — stare at something 20 feet away for 20 seconds."
+                            }
+                            .buttonStyle(.link)
+                            .font(.caption)
+                        }
                         TextEditor(text: $customReminderMessage)
                             .frame(height: 60)
                             .font(.body)
