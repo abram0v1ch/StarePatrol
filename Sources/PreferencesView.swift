@@ -36,42 +36,6 @@ struct SectionCard<Content: View>: View {
     }
 }
 
-// ── PreferencesView ────────────────────────────────────────────────────────
-// Fixed 520×500 window — no dynamic resize means zero jitter.
-
-struct PreferencesView: View {
-    @ObservedObject var timerManager: TimerManager
-    @State private var selectedSection: PrefSection = .general
-
-    var body: some View {
-        NavigationSplitView {
-            List(PrefSection.allCases, selection: $selectedSection) { section in
-                Label(section.rawValue, systemImage: section.icon).tag(section)
-            }
-            .listStyle(.sidebar)
-            .navigationSplitViewColumnWidth(min: 160, ideal: 160, max: 160)
-        } detail: {
-            detailView
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        }
-        // Lock sidebar open — hide the toggle button
-        .toolbar(removing: .sidebarToggle)
-        .navigationSplitViewStyle(.balanced)
-    }
-
-    @ViewBuilder private var detailView: some View {
-        switch selectedSection {
-        case .general:        GeneralSection(timerManager: timerManager)
-        case .intervals:      IntervalsSection(timerManager: timerManager)
-        case .notifications:  NotificationsSection(timerManager: timerManager)
-        case .appearance:     AppearanceSection()
-        case .statistics:     StatisticsSection()
-        case .about:          AboutSection()
-        case .debug:          DebugSection(timerManager: timerManager)
-        }
-    }
-}
-
 // ── Section enum ───────────────────────────────────────────────────────────
 
 enum PrefSection: String, CaseIterable, Identifiable {
@@ -93,6 +57,43 @@ enum PrefSection: String, CaseIterable, Identifiable {
         case .about:          return "info.circle"
         case .debug:          return "ladybug"
         }
+    }
+}
+
+// ── PreferencesView ────────────────────────────────────────────────────────
+// Manual HStack split — avoids NavigationSplitView which injects a
+// sidebar-toggle toolbar button we can't easily remove.
+
+struct PreferencesView: View {
+    @ObservedObject var timerManager: TimerManager
+    @State private var selectedSection: PrefSection = .general
+
+    var body: some View {
+        HStack(spacing: 0) {
+            // ── Sidebar ──────────────────────────────────────────────
+            List(PrefSection.allCases, selection: $selectedSection) { section in
+                Label(section.rawValue, systemImage: section.icon).tag(section)
+            }
+            .listStyle(.sidebar)
+            .frame(width: 160)
+
+            Divider()
+
+            // ── Detail ───────────────────────────────────────────────
+            Group {
+                switch selectedSection {
+                case .general:        GeneralSection(timerManager: timerManager)
+                case .intervals:      IntervalsSection(timerManager: timerManager)
+                case .notifications:  NotificationsSection(timerManager: timerManager)
+                case .appearance:     AppearanceSection()
+                case .statistics:     StatisticsSection()
+                case .about:          AboutSection()
+                case .debug:          DebugSection(timerManager: timerManager)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .frame(width: 520, height: 500)
     }
 }
 
@@ -267,7 +268,6 @@ struct AppearanceSection: View {
 struct StatisticsSection: View {
     @AppStorage("totalBreaksTaken") private var totalBreaksTaken: Int = 0
     @AppStorage("totalBreaksSkipped") private var totalBreaksSkipped: Int = 0
-
     var body: some View {
         VStack(spacing: 20) {
             Spacer()

@@ -3,6 +3,8 @@
 .swift-module-cache/
 build/
 out/
+out2/
+app/
 EyeReminder.app/
 StarePolice.app/
 make_icns.py

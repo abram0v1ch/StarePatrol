@@ -83,7 +83,9 @@ class TimerManager: ObservableObject {
     }
     
     func resetTimer() {
-        timeRemaining = isBreaking ? breakInterval : workInterval
+        isPaused = false
+        isBreaking = false
+        timeRemaining = workInterval
         startTimer()
     }
     
@@ -155,13 +157,8 @@ class TimerManager: ObservableObject {
                 isBreaking.toggle()
                 timeRemaining = isBreaking ? breakInterval : workInterval
                 // Play work-end sound when transitioning work → break
-                if isBreaking && wasWorking {
-                    let workEndSound = UserDefaults.standard.bool(forKey: "isWorkEndSoundEnabled")
-                    if workEndSound {
-                        SoundManager.shared.previewSound(
-                            UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
-                        )
-                    }
+                if isBreaking && wasWorking && isWorkEndSoundEnabled {
+                    SoundManager.shared.previewSound(selectedSoundName)
                 }
                 showReminderIfNeeded()
             }
