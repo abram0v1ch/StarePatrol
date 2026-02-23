@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 @main
-struct StarePoliceApp: App {
+struct StarePatrolApp: App {
     @StateObject private var timerManager = TimerManager()
     
     // We use a MenuBarExtra to make it a status bar app
@@ -17,11 +17,12 @@ struct StarePoliceApp: App {
                 Image(systemName: "eyes.inverse")
                     .foregroundColor(.yellow)
             } else {
-                HStack {
+                HStack(spacing: 4) {
                     Image(systemName: "eyes")
                     Text(timerManager.timeString)
                         .font(.body.monospacedDigit())
                 }
+                .frame(width: 80, alignment: .leading)
             }
         }
         // MenuBarExtra itself cannot easily hold onReceive that runs when menu is closed in some older macOS,

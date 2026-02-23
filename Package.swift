@@ -2,17 +2,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "StarePolice",
+    name: "StarePatrol",
     platforms: [.macOS(.v14)],
     targets: [
         .target(
-            name: "StarePoliceCore",
+            name: "StarePatrolCore",
             path: "Sources",
             sources: ["TimerManager.swift"]
         ),
         .testTarget(
-            name: "StarePoliceTests",
-            dependencies: ["StarePoliceCore"],
+            name: "StarePatrolTests",
+            dependencies: ["StarePatrolCore"],
             path: "Tests"
         )
     ]

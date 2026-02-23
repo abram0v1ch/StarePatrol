@@ -1,6 +1,8 @@
 import Foundation
 import Combine
 import SwiftUI
+import UserNotifications
+import SwiftUI
 
 class TimerManager: ObservableObject {
     @Published var timeRemaining: TimeInterval
@@ -9,6 +11,8 @@ class TimerManager: ObservableObject {
     // UserDefaults via AppStorage
     @AppStorage("workIntervalMinutes") var workIntervalMinutes: Int = 20
     @AppStorage("breakIntervalSeconds") var breakIntervalSeconds: Int = 20
+    @AppStorage("isAppEnabled") var isAppEnabled: Bool = true
+    @AppStorage("useFullScreenPopup") var useFullScreenPopup: Bool = true
     
     var workInterval: TimeInterval { TimeInterval(workIntervalMinutes * 60) }
     var breakInterval: TimeInterval { TimeInterval(breakIntervalSeconds) }
@@ -16,11 +20,29 @@ class TimerManager: ObservableObject {
     private var timer: AnyCancellable?
     
     init() {
-        // We can't immediately use self.workInterval before initialization in swift strict concurrency sometimes,
-        // but here it's safe after super.init, or we just pull from UserDefaults directly.
+        // Safe defaults configuration
+        UserDefaults.standard.register(defaults: [
+            "workIntervalMinutes": 20,
+            "breakIntervalSeconds": 20,
+            "isAppEnabled": true,
+            "useFullScreenPopup": true
+        ])
+        
         let initialWorkInterval = TimeInterval(UserDefaults.standard.integer(forKey: "workIntervalMinutes") > 0 ? UserDefaults.standard.integer(forKey: "workIntervalMinutes") * 60 : 1200)
         self.timeRemaining = initialWorkInterval // Start with full work interval
-        startTimer()
+        
+        if isAppEnabled {
+            startTimer()
+        }
+    }
+    
+    func settingsUpdated() {
+        if isAppEnabled {
+            resetTimer()
+        } else {
+            pauseTimer()
+            ReminderWindowManager.shared.hideReminder()
+        }
     }
     
     func startTimer() {
@@ -43,6 +65,8 @@ class TimerManager: ObservableObject {
     }
     
     private func tick() {
+        guard isAppEnabled else { return }
+        
         if timeRemaining > 0 {
             timeRemaining -= 1
         } else {
@@ -68,11 +92,32 @@ class TimerManager: ObservableObject {
     
     private func showReminderIfNeeded() {
         if isBreaking {
-            ReminderWindowManager.shared.showReminder(timerManager: self)
+            if useFullScreenPopup {
+                ReminderWindowManager.shared.showReminder(timerManager: self)
+            } else {
+                sendLocalNotification()
+            }
             NotificationCenter.default.post(name: .showReminder, object: nil)
         } else {
             ReminderWindowManager.shared.hideReminder()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
+        }
+    }
+    
+    private func sendLocalNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "StarePatrol"
+        content.body = "Time to rest your eyes! Look 20 feet away for \(Int(breakInterval)) seconds."
+        
+        // We handle sound in SoundManager manually based on preferences, 
+        // so we don't attach sound here unless we want to duplicate it.
+        
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert]) { granted, _ in
+            if granted {
+                UNUserNotificationCenter.current().add(request)
+            }
         }
     }
 }

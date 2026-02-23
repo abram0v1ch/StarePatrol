@@ -1,5 +1,5 @@
-APP_NAME = StarePolice
-BUNDLE_ID = com.vasyl.StarePolice
+APP_NAME = StarePatrol
+BUNDLE_ID = com.vasyl.StarePatrol
 APP_DIR = $(APP_NAME).app
 MACOS_DIR = $(APP_DIR)/Contents/MacOS
 RESOURCES_DIR = $(APP_DIR)/Contents/Resources
@@ -18,6 +18,9 @@ build:
 	
 	# Copy Info.plist
 	cp Info.plist $(APP_DIR)/Contents/Info.plist
+	
+	# Copy AppIcon directly
+	cp icon.png $(RESOURCES_DIR)/AppIcon.png
 	
 	# Copy assets directly if any (we will use system SF symbols mostly initially)
 	

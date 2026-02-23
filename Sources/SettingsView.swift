@@ -5,7 +5,7 @@ struct SettingsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("StarePolice 🚔")
+            Text("StarePatrol 🚔")
                 .font(.headline)
             
             Divider()
@@ -20,7 +20,7 @@ struct SettingsView: View {
             Divider()
             
             Button("Preferences...") {
-                PreferencesWindowManager.shared.showPreferences()
+                PreferencesWindowManager.shared.showPreferences(timerManager: timerManager)
             }
             
             Button("Reset Timer") {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import StarePoliceCore
+@testable import StarePatrolCore
 
 final class TimerManagerTests: XCTestCase {
     

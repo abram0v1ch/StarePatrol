@@ -6,7 +6,7 @@ class PreferencesWindowManager {
     
     private var preferencesWindow: NSWindow?
     
-    func showPreferences() {
+    func showPreferences(timerManager: TimerManager) {
         if preferencesWindow == nil {
             let panel = NSWindow(
                 contentRect: NSRect(x: 0, y: 0, width: 400, height: 350),
@@ -14,12 +14,12 @@ class PreferencesWindowManager {
                 backing: .buffered,
                 defer: false
             )
-            panel.title = "StarePolice Preferences"
+            panel.title = "StarePatrol Preferences"
             panel.center()
             panel.isReleasedWhenClosed = false
             panel.level = .floating
             
-            let hostingView = NSHostingView(rootView: PreferencesView())
+            let hostingView = NSHostingView(rootView: PreferencesView(timerManager: timerManager))
             panel.contentView = hostingView
             
             preferencesWindow = panel
