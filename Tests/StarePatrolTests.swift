@@ -240,7 +240,102 @@ final class TimerManagerTests: XCTestCase {
         XCTAssertEqual(manager.totalBreaksTaken, before + 1,
             "Auto-expired break should increment totalBreaksTaken")
     }
+
+    // MARK: Injectable closure hooks
+
+    func testTick_workToBreak_callsOnShowReminder() {
+        UserDefaults.standard.set("fullscreen", forKey: "notificationMode")
+        var showCalled = false
+        manager.onShowReminder = { _ in showCalled = true }
+        // Simulate work expiry → break starts
+        manager.isBreaking = false
+        manager.timeRemaining = 1
+        manager.isAppEnabled = true
+        manager.tick() // → 0
+        manager.tick() // transition: work → break
+        XCTAssertTrue(showCalled, "onShowReminder must be called when break starts")
+    }
+
+    func testTick_breakToWork_callsOnHideReminder() {
+        var hideCalled = false
+        manager.onHideReminder = { hideCalled = true }
+        manager.isBreaking = true
+        manager.timeRemaining = 1
+        manager.isAppEnabled = true
+        manager.tick() // → 0
+        manager.tick() // transition: break → work
+        XCTAssertTrue(hideCalled, "onHideReminder must be called when break ends")
+    }
+
+    func testTick_workToBreak_callsOnHaptic() {
+        var hapticCalled = false
+        manager.onHaptic = { hapticCalled = true }
+        manager.isBreaking = false
+        manager.timeRemaining = 1
+        manager.isAppEnabled = true
+        manager.tick()
+        manager.tick()
+        XCTAssertTrue(hapticCalled, "onHaptic must be called on work→break transition")
+    }
+
+    func testTick_breakToWork_callsOnHaptic() {
+        var hapticCalled = false
+        manager.onHaptic = { hapticCalled = true }
+        manager.isBreaking = true
+        manager.timeRemaining = 1
+        manager.isAppEnabled = true
+        manager.tick()
+        manager.tick()
+        XCTAssertTrue(hapticCalled, "onHaptic must be called on break→work transition")
+    }
+
+    func testTick_workToBreak_callsOnPlaySound_whenEnabled() {
+        UserDefaults.standard.set(true, forKey: "breakStartSoundEnabled")
+        var playedSound: String?
+        manager.onPlaySound = { name in playedSound = name }
+        manager.isBreaking = false
+        manager.timeRemaining = 1
+        manager.isAppEnabled = true
+        manager.tick()
+        manager.tick()
+        XCTAssertNotNil(playedSound, "onPlaySound must be called for break-start sound")
+    }
+
+    func testTick_breakToWork_callsOnPlaySound_whenEnabled() {
+        UserDefaults.standard.set(true, forKey: "breakEndSoundEnabled")
+        var playedSound: String?
+        manager.onPlaySound = { name in playedSound = name }
+        manager.isBreaking = true
+        manager.timeRemaining = 1
+        manager.isAppEnabled = true
+        manager.tick()
+        manager.tick()
+        XCTAssertNotNil(playedSound, "onPlaySound must be called for break-end sound")
+    }
+
+    func testSkipBreak_callsOnHapticAndHideReminder() {
+        var hapticCalled = false
+        var hideCalled = false
+        manager.onHaptic       = { hapticCalled = true }
+        manager.onHideReminder = { hideCalled = true }
+        manager.isBreaking = true
+        manager.skipBreak()
+        XCTAssertTrue(hapticCalled, "onHaptic must fire when skipping a break")
+        XCTAssertTrue(hideCalled,   "onHideReminder must fire when skipping a break")
+    }
+
+    func testCompleteBreak_callsOnHapticAndHideReminder() {
+        var hapticCalled = false
+        var hideCalled = false
+        manager.onHaptic       = { hapticCalled = true }
+        manager.onHideReminder = { hideCalled = true }
+        manager.isBreaking = true
+        manager.completeBreak()
+        XCTAssertTrue(hapticCalled, "onHaptic must fire when completing a break")
+        XCTAssertTrue(hideCalled,   "onHideReminder must fire when completing a break")
+    }
 }
+
 
 // MARK: - PauseUtils Tests
 
