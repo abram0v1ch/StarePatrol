@@ -28,14 +28,22 @@ struct StarePatrolApp: App {
     }
     
     init() {
-        NotificationCenter.default.addObserver(forName: .showReminder, object: nil, queue: .main) { _ in
-            SoundManager.shared.triggerFeedback()
-        }
-        NotificationCenter.default.addObserver(forName: .hideReminder, object: nil, queue: .main) { _ in
-            ReminderWindowManager.shared.hideReminder()
+        // Wire real AppKit implementations into the injectable closures
+        timerManager.onPlaySound    = { name in SoundManager.shared.previewSound(name) }
+        timerManager.onHaptic       = { SoundManager.shared.performHapticFeedback() }
+        timerManager.onShowReminder = { mgr in ReminderWindowManager.shared.showReminder(timerManager: mgr) }
+        timerManager.onHideReminder = { ReminderWindowManager.shared.hideReminder() }
+        
+        // Forward notification-action events (snooze/skip from banners) to the timer
+        NotificationCenter.default.addObserver(forName: .notificationActionReceived, object: nil, queue: .main) { [self] notification in
+            if let action = notification.userInfo?["action"] as? String {
+                if action == "SNOOZE_ACTION" { timerManager.snoozeBreak(minutes: 5) }
+                else if action == "SKIP_ACTION" { timerManager.skipBreak() }
+            }
         }
     }
 }
+
 
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {

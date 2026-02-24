@@ -3,6 +3,17 @@ import Combine
 import SwiftUI
 import UserNotifications
 
+// MARK: - Side-effect hooks (injectable for testing)
+
+/// Called when a sound should play. Receives the sound name.
+typealias PlaySoundAction   = (_ name: String) -> Void
+/// Called when haptic feedback should fire.
+typealias HapticAction      = () -> Void
+/// Called to show the break reminder to the user.
+typealias ShowReminderAction = (_ manager: TimerManager) -> Void
+/// Called to hide the break reminder.
+typealias HideReminderAction = () -> Void
+
 class TimerManager: ObservableObject {
     @Published var timeRemaining: TimeInterval
     @Published var isBreaking: Bool = false
@@ -31,6 +42,12 @@ class TimerManager: ObservableObject {
     
     private var timer: AnyCancellable?
     
+    // Injectable side-effects — set by app at launch, no-ops for tests
+    var onPlaySound:    PlaySoundAction    = { _ in }
+    var onHaptic:       HapticAction       = { }
+    var onShowReminder: ShowReminderAction = { _ in }
+    var onHideReminder: HideReminderAction = { }
+    
     init() {
         // Safe defaults configuration
         UserDefaults.standard.register(defaults: [
@@ -46,17 +63,6 @@ class TimerManager: ObservableObject {
         if isAppEnabled {
             startTimer()
         }
-        
-        // Listen for notification actions even when UI is closed
-        NotificationCenter.default.addObserver(forName: .notificationActionReceived, object: nil, queue: .main) { [weak self] notification in
-            if let action = notification.userInfo?["action"] as? String {
-                if action == "SNOOZE_ACTION" {
-                    self?.snoozeBreak(minutes: 5)
-                } else if action == "SKIP_ACTION" {
-                    self?.skipBreak()
-                }
-            }
-        }
     }
     
     func settingsUpdated() {
@@ -64,7 +70,7 @@ class TimerManager: ObservableObject {
             resetTimer()
         } else {
             pauseTimer()
-            ReminderWindowManager.shared.hideReminder()
+            onHideReminder()
         }
     }
     
@@ -96,8 +102,8 @@ class TimerManager: ObservableObject {
             totalBreaksSkipped += 1
             isBreaking = false
             playBreakEndSoundIfNeeded()
-            SoundManager.shared.performHapticFeedback()
-            ReminderWindowManager.shared.hideReminder()
+            onHaptic()
+            onHideReminder()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
             resetTimer()
         }
@@ -108,8 +114,8 @@ class TimerManager: ObservableObject {
             totalBreaksTaken += 1
             isBreaking = false
             playBreakEndSoundIfNeeded()
-            SoundManager.shared.performHapticFeedback()
-            ReminderWindowManager.shared.hideReminder()
+            onHaptic()
+            onHideReminder()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
             resetTimer()
         }
@@ -118,14 +124,14 @@ class TimerManager: ObservableObject {
     private func playBreakEndSoundIfNeeded() {
         guard UserDefaults.standard.bool(forKey: "breakEndSoundEnabled") else { return }
         let snd = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
-        SoundManager.shared.previewSound(snd)
+        onPlaySound(snd)
     }
     
     func pauseApp(minutes: Int) {
         isBreaking = false
         isPaused = true
         timeRemaining = TimeInterval(minutes * 60)
-        ReminderWindowManager.shared.hideReminder()
+        onHideReminder()
         NotificationCenter.default.post(name: .hideReminder, object: nil)
         startTimer()
     }
@@ -134,7 +140,7 @@ class TimerManager: ObservableObject {
         isBreaking = false
         isPaused = true
         pauseTimer()
-        ReminderWindowManager.shared.hideReminder()
+        onHideReminder()
         NotificationCenter.default.post(name: .hideReminder, object: nil)
     }
     
@@ -149,7 +155,7 @@ class TimerManager: ObservableObject {
             isBreaking = false
             isPaused = true
             timeRemaining = TimeInterval(minutes * 60)
-            ReminderWindowManager.shared.hideReminder()
+            onHideReminder()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
             startTimer()
         }
@@ -181,16 +187,16 @@ class TimerManager: ObservableObject {
                 if isBreaking && !wasBreaking {
                     // work → break: play break-START sound
                     if UserDefaults.standard.bool(forKey: "breakStartSoundEnabled") {
-                        SoundManager.shared.previewSound(snd)
+                        onPlaySound(snd)
                     }
                 } else if !isBreaking && wasBreaking {
                     // break → work: count the completed break, then play break-END sound
                     totalBreaksTaken += 1
                     if UserDefaults.standard.bool(forKey: "breakEndSoundEnabled") {
-                        SoundManager.shared.previewSound(snd)
+                        onPlaySound(snd)
                     }
                 }
-                SoundManager.shared.performHapticFeedback()
+                onHaptic()
                 showReminderIfNeeded()
             }
         }
@@ -207,7 +213,7 @@ class TimerManager: ObservableObject {
         if isBreaking {
             switch notificationMode {
             case "fullscreen":
-                ReminderWindowManager.shared.showReminder(timerManager: self)
+                onShowReminder(self)
             case "notification":
                 sendLocalNotification()
             default:
@@ -215,7 +221,7 @@ class TimerManager: ObservableObject {
             }
             NotificationCenter.default.post(name: .showReminder, object: nil)
         } else {
-            ReminderWindowManager.shared.hideReminder()
+            onHideReminder()
             NotificationCenter.default.post(name: .hideReminder, object: nil)
         }
     }
