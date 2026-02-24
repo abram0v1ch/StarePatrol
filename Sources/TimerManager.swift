@@ -163,7 +163,7 @@ class TimerManager: ObservableObject {
         }
     }
     
-    private func tick() {
+    func tick() {
         guard isAppEnabled else { return }
         
         if timeRemaining > 0 {
@@ -184,7 +184,8 @@ class TimerManager: ObservableObject {
                         SoundManager.shared.previewSound(snd)
                     }
                 } else if !isBreaking && wasBreaking {
-                    // break → work: play break-END sound
+                    // break → work: count the completed break, then play break-END sound
+                    totalBreaksTaken += 1
                     if UserDefaults.standard.bool(forKey: "breakEndSoundEnabled") {
                         SoundManager.shared.previewSound(snd)
                     }

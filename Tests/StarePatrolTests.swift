@@ -222,6 +222,24 @@ final class TimerManagerTests: XCTestCase {
         manager.completeBreak()
         XCTAssertFalse(manager.isBreaking)
     }
+
+    // MARK: tick – auto-expiry counts as a break taken (regression test)
+
+    func testTick_breakExpiry_incrementsTaken() {
+        // Put manager into break mode with 1 second remaining
+        manager.isBreaking = true
+        manager.timeRemaining = 1
+        manager.isAppEnabled = true
+        let before = manager.totalBreaksTaken
+
+        // First tick: decrements timeRemaining to 0
+        manager.tick()
+        // Second tick: timeRemaining == 0, fires break→work transition
+        manager.tick()
+
+        XCTAssertEqual(manager.totalBreaksTaken, before + 1,
+            "Auto-expired break should increment totalBreaksTaken")
+    }
 }
 
 // MARK: - PauseUtils Tests
