@@ -116,10 +116,7 @@ class TimerManager: ObservableObject {
         if isBreaking {
             totalBreaksSkipped += 1
             isBreaking = false
-            playBreakEndSoundIfNeeded()
-            onHaptic()
-            onHideReminder()
-            NotificationCenter.default.post(name: .hideReminder, object: nil)
+            executeBreakEndSideEffects()
             resetTimer()
         }
     }
@@ -128,18 +125,28 @@ class TimerManager: ObservableObject {
         if isBreaking {
             totalBreaksTaken += 1
             isBreaking = false
-            playBreakEndSoundIfNeeded()
-            onHaptic()
-            onHideReminder()
-            NotificationCenter.default.post(name: .hideReminder, object: nil)
+            executeBreakEndSideEffects()
             resetTimer()
         }
     }
     
-    private func playBreakEndSoundIfNeeded() {
-        guard UserDefaults.standard.bool(forKey: "breakEndSoundEnabled") else { return }
-        let snd = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
-        onPlaySound(snd)
+    private func executeBreakStartSideEffects() {
+        if UserDefaults.standard.bool(forKey: "breakStartSoundEnabled") {
+            let snd = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
+            onPlaySound(snd)
+        }
+        onHaptic()
+        showReminderIfNeeded()
+    }
+    
+    private func executeBreakEndSideEffects() {
+        if UserDefaults.standard.bool(forKey: "breakEndSoundEnabled") {
+            let snd = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
+            onPlaySound(snd)
+        }
+        onHaptic()
+        onHideReminder()
+        NotificationCenter.default.post(name: .hideReminder, object: nil)
     }
     
     func pauseApp(minutes: Int) {
@@ -180,7 +187,7 @@ class TimerManager: ObservableObject {
         if !isBreaking {
             isBreaking = true
             timeRemaining = breakInterval
-            showReminderIfNeeded()
+            executeBreakStartSideEffects()
         }
     }
     
@@ -198,21 +205,14 @@ class TimerManager: ObservableObject {
                 isBreaking.toggle()
                 timeRemaining = isBreaking ? breakInterval : workInterval
                 
-                let snd = UserDefaults.standard.string(forKey: "selectedSoundName") ?? "Glass"
                 if isBreaking && !wasBreaking {
-                    // work → break: play break-START sound
-                    if UserDefaults.standard.bool(forKey: "breakStartSoundEnabled") {
-                        onPlaySound(snd)
-                    }
+                    // work → break
+                    executeBreakStartSideEffects()
                 } else if !isBreaking && wasBreaking {
-                    // break → work: count the completed break, then play break-END sound
+                    // break → work
                     totalBreaksTaken += 1
-                    if UserDefaults.standard.bool(forKey: "breakEndSoundEnabled") {
-                        onPlaySound(snd)
-                    }
+                    executeBreakEndSideEffects()
                 }
-                onHaptic()
-                showReminderIfNeeded()
             }
         }
     }
