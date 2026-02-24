@@ -29,16 +29,9 @@ class SoundManager {
         }
     }
     
-    func performHapticFeedback(style: String = "alignment") {
+    func performHapticFeedback() {
         guard UserDefaults.standard.bool(forKey: "isHapticsEnabled") else { return }
-        let pattern: NSHapticFeedbackManager.FeedbackPattern
-        switch style {
-        case "generic": pattern = .generic
-        case "levelChange": pattern = .levelChange
-        case "alignment": fallthrough
-        default: pattern = .alignment
-        }
-        NSHapticFeedbackManager.defaultPerformer.perform(pattern, performanceTime: .now)
+        NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
     }
     
     func triggerFeedback() {

@@ -181,7 +181,6 @@ struct NotificationsSection: View {
     @AppStorage("breakEndSoundEnabled") private var breakEndSoundEnabled: Bool = true
     @AppStorage("selectedSoundName") private var selectedSoundName: String = "Glass"
     @AppStorage("isHapticsEnabled") private var isHapticsEnabled: Bool = true
-    @AppStorage("hapticFeedbackStyle") private var hapticFeedbackStyle: String = "alignment"
     @AppStorage("isAppEnabled") private var isAppEnabled: Bool = true
     let availableSounds = ["Glass", "Ping", "Purr", "Funk", "Basso", "Hero", "Pop", "Submarine"]
 
@@ -218,21 +217,7 @@ struct NotificationsSection: View {
                 }
                 Divider()
                 PrefRow(icon: "hand.tap", color: .pink) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Toggle("Haptic Feedback", isOn: $isHapticsEnabled)
-                        if isHapticsEnabled {
-                            Picker("", selection: $hapticFeedbackStyle) {
-                                Text("Light").tag("alignment")
-                                Text("Medium").tag("generic")
-                                Text("Notch").tag("levelChange")
-                            }
-                            .pickerStyle(.segmented)
-                            .labelsHidden()
-                            .onChange(of: hapticFeedbackStyle) {
-                                SoundManager.shared.performHapticFeedback(style: hapticFeedbackStyle)
-                            }
-                        }
-                    }
+                    Toggle("Haptic Feedback", isOn: $isHapticsEnabled)
                 }
             }
             Spacer()
