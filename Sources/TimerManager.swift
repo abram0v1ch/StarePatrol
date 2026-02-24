@@ -54,7 +54,15 @@ class TimerManager: ObservableObject {
             "workIntervalMinutes": 20,
             "breakIntervalSeconds": 20,
             "isAppEnabled": true,
-            "notificationMode": "fullscreen"
+            "notificationMode": "fullscreen",
+            // Sound / haptic defaults — also registered by SoundManager, but
+            // TimerManager's tick() gates on these keys so they must be seeded here
+            // too in case SoundManager.shared hasn't been initialized yet.
+            "isSoundEnabled": true,
+            "breakStartSoundEnabled": true,
+            "breakEndSoundEnabled": true,
+            "isHapticsEnabled": true,
+            "selectedSoundName": "Glass"
         ])
         
         let initialWorkInterval = TimeInterval(UserDefaults.standard.integer(forKey: "workIntervalMinutes") > 0 ? UserDefaults.standard.integer(forKey: "workIntervalMinutes") * 60 : 1200)
