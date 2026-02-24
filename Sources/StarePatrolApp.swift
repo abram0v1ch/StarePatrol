@@ -28,13 +28,11 @@ struct StarePatrolApp: App {
     }
     
     init() {
-        // Create the manager first, wire real AppKit implementations, then hand
-        // it to SwiftUI. Using _timerManager = StateObject(wrappedValue:) is the
-        // only correct pattern — accessing `self.timerManager` in init() reaches
-        // a throwaway wrapper, NOT the instance SwiftUI will use for the view.
+        // Create manager and hand it to SwiftUI via the only correct init pattern.
+        // onPlaySound and onHaptic are already wired to SoundManager inside
+        // TimerManager.init() — only the window-manager closures need wiring here
+        // since ReminderWindowManager can't be in the StarePatrolCore test target.
         let manager = TimerManager()
-        manager.onPlaySound    = { name in SoundManager.shared.previewSound(name) }
-        manager.onHaptic       = { SoundManager.shared.performHapticFeedback() }
         manager.onShowReminder = { mgr in ReminderWindowManager.shared.showReminder(timerManager: mgr) }
         manager.onHideReminder = { ReminderWindowManager.shared.hideReminder() }
         _timerManager = StateObject(wrappedValue: manager)

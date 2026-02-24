@@ -1,5 +1,4 @@
 import AppKit
-import SwiftUI
 
 class SoundManager {
     static let shared = SoundManager()

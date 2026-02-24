@@ -8,7 +8,7 @@ let package = Package(
         .target(
             name: "StarePatrolCore",
             path: "Sources",
-            sources: ["TimerManager.swift", "PauseUtils.swift"]
+            sources: ["TimerManager.swift", "PauseUtils.swift", "SoundManager.swift"]
         ),
         .testTarget(
             name: "StarePatrolTests",

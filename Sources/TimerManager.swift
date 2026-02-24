@@ -68,6 +68,13 @@ class TimerManager: ObservableObject {
         let initialWorkInterval = TimeInterval(UserDefaults.standard.integer(forKey: "workIntervalMinutes") > 0 ? UserDefaults.standard.integer(forKey: "workIntervalMinutes") * 60 : 1200)
         self.timeRemaining = initialWorkInterval // Start with full work interval
         
+        // Default sound/haptic closures call SoundManager directly.
+        // These are set HERE (not in StarePatrolApp) because SwiftUI re-invokes
+        // App.init() on every re-render and discards all but the first TimerManager
+        // instance — any closures set in App.init() are lost on subsequent calls.
+        onPlaySound = { name in SoundManager.shared.previewSound(name) }
+        onHaptic    = { SoundManager.shared.performHapticFeedback() }
+        
         if isAppEnabled {
             startTimer()
         }
