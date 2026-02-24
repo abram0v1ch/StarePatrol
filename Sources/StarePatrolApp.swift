@@ -5,7 +5,7 @@ import UserNotifications
 @main
 struct StarePatrolApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @StateObject private var timerManager = TimerManager()
+    @StateObject private var timerManager: TimerManager
     
     var body: some Scene {
         // .window style renders content in a stable floating popover rather than
@@ -28,17 +28,22 @@ struct StarePatrolApp: App {
     }
     
     init() {
-        // Wire real AppKit implementations into the injectable closures
-        timerManager.onPlaySound    = { name in SoundManager.shared.previewSound(name) }
-        timerManager.onHaptic       = { SoundManager.shared.performHapticFeedback() }
-        timerManager.onShowReminder = { mgr in ReminderWindowManager.shared.showReminder(timerManager: mgr) }
-        timerManager.onHideReminder = { ReminderWindowManager.shared.hideReminder() }
+        // Create the manager first, wire real AppKit implementations, then hand
+        // it to SwiftUI. Using _timerManager = StateObject(wrappedValue:) is the
+        // only correct pattern — accessing `self.timerManager` in init() reaches
+        // a throwaway wrapper, NOT the instance SwiftUI will use for the view.
+        let manager = TimerManager()
+        manager.onPlaySound    = { name in SoundManager.shared.previewSound(name) }
+        manager.onHaptic       = { SoundManager.shared.performHapticFeedback() }
+        manager.onShowReminder = { mgr in ReminderWindowManager.shared.showReminder(timerManager: mgr) }
+        manager.onHideReminder = { ReminderWindowManager.shared.hideReminder() }
+        _timerManager = StateObject(wrappedValue: manager)
         
         // Forward notification-action events (snooze/skip from banners) to the timer
-        NotificationCenter.default.addObserver(forName: .notificationActionReceived, object: nil, queue: .main) { [self] notification in
+        NotificationCenter.default.addObserver(forName: .notificationActionReceived, object: nil, queue: .main) { notification in
             if let action = notification.userInfo?["action"] as? String {
-                if action == "SNOOZE_ACTION" { timerManager.snoozeBreak(minutes: 5) }
-                else if action == "SKIP_ACTION" { timerManager.skipBreak() }
+                if action == "SNOOZE_ACTION" { manager.snoozeBreak(minutes: 5) }
+                else if action == "SKIP_ACTION" { manager.skipBreak() }
             }
         }
     }
