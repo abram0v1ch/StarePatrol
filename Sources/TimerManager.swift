@@ -35,6 +35,8 @@ class TimerManager: ObservableObject {
     @AppStorage("isStrictMode") var isStrictMode: Bool = false
     @AppStorage("isSoundEnabled") var isSoundEnabled: Bool = true
     @AppStorage("isWorkEndSoundEnabled") var isWorkEndSoundEnabled: Bool = false
+    @AppStorage("isHapticsEnabled") var isHapticsEnabled: Bool = true
+    @AppStorage("hapticFeedbackStyle") var hapticFeedbackStyle: String = "alignment"
     @AppStorage("selectedSoundName") var selectedSoundName: String = "Glass"
     
     var workInterval: TimeInterval { TimeInterval(workIntervalMinutes * 60) }
@@ -62,6 +64,7 @@ class TimerManager: ObservableObject {
             "breakStartSoundEnabled": true,
             "breakEndSoundEnabled": true,
             "isHapticsEnabled": true,
+            "hapticFeedbackStyle": "alignment",
             "selectedSoundName": "Glass"
         ])
         
@@ -73,7 +76,7 @@ class TimerManager: ObservableObject {
         // App.init() on every re-render and discards all but the first TimerManager
         // instance — any closures set in App.init() are lost on subsequent calls.
         onPlaySound = { name in SoundManager.shared.previewSound(name) }
-        onHaptic    = { SoundManager.shared.performHapticFeedback() }
+        onHaptic    = { SoundManager.shared.performHapticFeedback(style: UserDefaults.standard.string(forKey: "hapticFeedbackStyle") ?? "alignment") }
         
         if isAppEnabled {
             startTimer()
