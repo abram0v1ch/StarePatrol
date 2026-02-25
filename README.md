@@ -76,7 +76,7 @@ cd StarePatrol
 make run
 ```
 
-This compiles, signs ad-hoc, and launches the app automatically. Output is always at `/tmp/StarePatrol-build/StarePatrol.app`.
+This compiles, signs ad-hoc, and launches the app automatically. Output is always at `release/StarePatrol.app`.
 
 ---
 
@@ -113,7 +113,7 @@ so break notifications persist until you dismiss them.
 ## Makefile
 
 ```bash
-make build   # compile to /tmp/StarePatrol-build/StarePatrol.app
+make build   # compile to release/StarePatrol.app
 make run     # build + open
 make clean   # quit + remove build artifacts
 ```

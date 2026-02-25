@@ -166,6 +166,40 @@ final class TimerManagerTests: XCTestCase {
         XCTAssertFalse(manager.isTimerRunning)
     }
 
+    // MARK: System Sleep/Wake
+    
+    func testHandleSystemSleep_whenRunning_pausesTimerAndSetsFlag() {
+        manager.startTimer()
+        XCTAssertFalse(manager.isPaused)
+        
+        manager.handleSystemSleep()
+        
+        XCTAssertTrue(manager.isPaused)
+        XCTAssertFalse(manager.isTimerRunning)
+    }
+    
+    func testHandleSystemSleep_whenAlreadyPaused_doesNotSetFlag() {
+        manager.pauseIndefinitely() // Manual pause
+        XCTAssertTrue(manager.isPaused)
+        
+        manager.handleSystemSleep()
+        manager.handleSystemWake()
+        
+        // Timer should still be paused because it was manually paused before sleep
+        XCTAssertTrue(manager.isPaused)
+        XCTAssertFalse(manager.isTimerRunning)
+    }
+    
+    func testHandleSystemWake_whenAutoPaused_resumesTimer() {
+        manager.startTimer()
+        manager.handleSystemSleep()
+        XCTAssertTrue(manager.isPaused)
+        
+        manager.handleSystemWake()
+        
+        XCTAssertFalse(manager.isPaused)
+        XCTAssertTrue(manager.isTimerRunning)
+    }
     func testIsTimerRunning_trueAfterStartTimer() {
         manager.pauseTimer()
         manager.startTimer()
