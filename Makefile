@@ -1,7 +1,7 @@
 APP_NAME      = StarePatrol
 BUNDLE_ID     = com.vasyl.StarePatrol
 BUILD_DIR     = app
-APP_DIR       = /tmp/StarePatrol-build/$(APP_NAME).app
+APP_DIR       = release/$(APP_NAME).app
 MACOS_DIR     = $(APP_DIR)/Contents/MacOS
 RESOURCES_DIR = $(APP_DIR)/Contents/Resources
 SWIFT_FILES   = $(wildcard Sources/*.swift)

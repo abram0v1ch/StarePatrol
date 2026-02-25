@@ -37,6 +37,21 @@ struct StarePatrolApp: App {
         manager.onHideReminder = { ReminderWindowManager.shared.hideReminder() }
         _timerManager = StateObject(wrappedValue: manager)
         
+        // Watch for system sleep/wake and lock/unlock events
+        let workspace = NSWorkspace.shared
+        workspace.notificationCenter.addObserver(forName: NSWorkspace.screensDidSleepNotification, object: nil, queue: .main) { _ in
+            manager.handleSystemSleep()
+        }
+        workspace.notificationCenter.addObserver(forName: NSWorkspace.sessionDidResignActiveNotification, object: nil, queue: .main) { _ in
+            manager.handleSystemSleep()
+        }
+        workspace.notificationCenter.addObserver(forName: NSWorkspace.screensDidWakeNotification, object: nil, queue: .main) { _ in
+            manager.handleSystemWake()
+        }
+        workspace.notificationCenter.addObserver(forName: NSWorkspace.sessionDidBecomeActiveNotification, object: nil, queue: .main) { _ in
+            manager.handleSystemWake()
+        }
+        
         // Forward notification-action events (snooze/skip from banners) to the timer
         NotificationCenter.default.addObserver(forName: .notificationActionReceived, object: nil, queue: .main) { notification in
             if let action = notification.userInfo?["action"] as? String {

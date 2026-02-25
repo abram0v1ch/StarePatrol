@@ -166,6 +166,25 @@ class TimerManager: ObservableObject {
         NotificationCenter.default.post(name: .hideReminder, object: nil)
     }
     
+    private var wasAutoPausedForSleep = false
+    
+    func handleSystemSleep() {
+        if !isPaused {
+            wasAutoPausedForSleep = true
+            isPaused = true
+            pauseTimer()
+            onHideReminder()
+            NotificationCenter.default.post(name: .hideReminder, object: nil)
+        }
+    }
+    
+    func handleSystemWake() {
+        if wasAutoPausedForSleep {
+            wasAutoPausedForSleep = false
+            resumeTimer()
+        }
+    }
+    
     func resumeTimer() {
         isPaused = false
         resetTimer()
