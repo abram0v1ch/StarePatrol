@@ -181,7 +181,8 @@ class TimerManager: ObservableObject {
     func handleSystemWake() {
         if wasAutoPausedForSleep {
             wasAutoPausedForSleep = false
-            resumeTimer()
+            isPaused = false
+            startTimer()
         }
     }
     

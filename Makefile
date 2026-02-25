@@ -21,7 +21,9 @@ test:
 build:
 	@# 1. Quit any running instance
 	-killall $(APP_NAME) 2>/dev/null; sleep 0.5
-	@# 2. Compile into /tmp (no provenance lock)
+	@# 2. Clear old build
+	rm -rf $(APP_DIR)
+	@# 3. Compile
 	mkdir -p $(MACOS_DIR) $(RESOURCES_DIR)
 	swiftc $(SWIFT_FLAGS) $(SWIFT_FILES) -o $(MACOS_DIR)/$(APP_NAME)
 	cp Info.plist $(APP_DIR)/Contents/Info.plist
